@@ -16,9 +16,9 @@ Remote publication is not configured. Artifacts are installed in the local Maven
 The command checks Java sources, formatting, strict Javadoc and an isolated Maven project that
 consumes the packaged artifact and its transitive dependencies. It produces:
 
-- target/diagram-kiln-1.0.0.jar
-- target/diagram-kiln-1.0.0-sources.jar
-- target/diagram-kiln-1.0.0-javadoc.jar
+- `target/diagram-kiln-<version>.jar`
+- `target/diagram-kiln-<version>-sources.jar`
+- `target/diagram-kiln-<version>-javadoc.jar`
 
 The local release bundle is target/releases/diagram-kiln-1.0.0.zip: three JARs, the POM,
 README, LICENSE, changelog, documentation, examples and SHA256SUMS.
@@ -31,7 +31,8 @@ regular classpath/Maven consumption is supported. Runtime dependencies remain se
 their classes are not copied into the library JAR.
 
 Build plugin and runtime dependency versions are pinned in the POM properties block. The project
-release version remains the literal Maven coordinate 1.0.0. project.build.outputTimestamp fixes
+version remains a literal Maven coordinate: 1.0.0 on main, 1.1.0-SNAPSHOT on dev.
+project.build.outputTimestamp fixes
 archive entry timestamps and Javadoc omits the generation date. Reproducibility means identical
 artifacts for identical sources, JDK and Maven; different JDKs can generate different Javadoc HTML.
 Update the timestamp deliberately when preparing a release.

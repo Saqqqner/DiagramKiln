@@ -14,7 +14,9 @@ Requires **Java 17+**.
 
 ## Install
 
-The current version is **1.0.0**. It is not yet published to a public Maven repository.
+The latest release is **1.0.0** (tag `1.0.0`). This branch develops **1.1.0-SNAPSHOT**.
+Artifacts are not yet published to a public Maven repository.
+
 First build and install it from the project root:
 
 ```powershell
@@ -33,7 +35,7 @@ Then add this dependency to your application's `pom.xml`:
 <dependency>
   <groupId>io.github.saqqqner</groupId>
   <artifactId>diagram-kiln</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0-SNAPSHOT</version>
 </dependency>
 ```
 

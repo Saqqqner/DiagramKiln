@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased — 1.1.0-SNAPSHOT
+
 ## 1.0.0 — 2026-10-19
 
 - draw.io-compatible compressed #R URL fragment output alongside plain XML export.
