@@ -14,7 +14,7 @@ Requires **Java 17+**.
 
 ## Install
 
-The latest release is **1.0.0** (tag `1.0.0`). This branch develops **1.1.0-SNAPSHOT**.
+The latest release is **1.0.1** (tag `1.0.1`). This branch develops **1.1.0-SNAPSHOT**.
 Artifacts are not yet published to a public Maven repository.
 
 First build and install it from the project root:

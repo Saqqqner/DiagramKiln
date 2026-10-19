@@ -2,6 +2,10 @@
 
 ## Unreleased — 1.1.0-SNAPSHOT
 
+## 1.0.1 — 2026-10-19
+
+- Document compact record constructor parameters so strict Javadoc succeeds on Java 17.
+
 ## 1.0.0 — 2026-10-19
 
 - draw.io-compatible compressed #R URL fragment output alongside plain XML export.
