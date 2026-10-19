@@ -15,9 +15,14 @@ package io.github.saqqqner.diagramkiln.config;
  *          finite nonnegative minimum spacing between layers, in pixels
  * @param groupPadding
  *          finite nonnegative inner group padding, in addition to its header, in pixels
+ * @param feedbackEdges
+ *          whether ELK routes backward edges around nodes, preserving flow-side attachments
+ * @param preserveNodeOrder
+ *          whether same-layer nodes retain declaration order within each connected component
  */
 public record LayoutOptions(Direction direction, double nodeWidth, double nodeHeight,
-    double nodeSpacing, double layerSpacing, double groupPadding) {
+    double nodeSpacing, double layerSpacing, double groupPadding, boolean feedbackEdges,
+    boolean preserveNodeOrder) {
   /**
    * Creates settings with legacy spacing (40/80) and group padding (20).
    *
@@ -33,7 +38,7 @@ public record LayoutOptions(Direction direction, double nodeWidth, double nodeHe
   }
 
   /**
-   * Validates that direction is set and leaf dimensions are finite and positive.
+   * Creates settings with feedback-edge routing disabled, preserving legacy behavior.
    *
    * @param direction
    *          non-null main flow direction
@@ -47,6 +52,55 @@ public record LayoutOptions(Direction direction, double nodeWidth, double nodeHe
    *          finite nonnegative minimum spacing between layers, in pixels
    * @param groupPadding
    *          finite nonnegative inner group padding, in addition to its header, in pixels
+   */
+  public LayoutOptions(Direction direction, double nodeWidth, double nodeHeight, double nodeSpacing,
+      double layerSpacing, double groupPadding) {
+    this(direction, nodeWidth, nodeHeight, nodeSpacing, layerSpacing, groupPadding, false);
+  }
+
+  /**
+   * Creates settings with automatic node ordering and optional feedback routing.
+   *
+   * @param direction
+   *          non-null flow direction
+   * @param nodeWidth
+   *          finite positive leaf width
+   * @param nodeHeight
+   *          finite positive leaf height
+   * @param nodeSpacing
+   *          finite nonnegative spacing within a layer
+   * @param layerSpacing
+   *          finite nonnegative spacing between layers
+   * @param groupPadding
+   *          finite nonnegative group padding
+   * @param feedbackEdges
+   *          whether to route feedback edges around nodes
+   */
+  public LayoutOptions(Direction direction, double nodeWidth, double nodeHeight, double nodeSpacing,
+      double layerSpacing, double groupPadding, boolean feedbackEdges) {
+    this(direction, nodeWidth, nodeHeight, nodeSpacing, layerSpacing, groupPadding, feedbackEdges,
+        false);
+  }
+
+  /**
+   * Validates direction, dimensions and spacing.
+   *
+   * @param direction
+   *          non-null main flow direction
+   * @param nodeWidth
+   *          finite positive leaf width in pixels
+   * @param nodeHeight
+   *          finite positive leaf height in pixels
+   * @param nodeSpacing
+   *          finite nonnegative spacing within a layer
+   * @param layerSpacing
+   *          finite nonnegative spacing between layers
+   * @param groupPadding
+   *          finite nonnegative inner group padding
+   * @param feedbackEdges
+   *          whether backward edges retain flow-side attachments and route around nodes
+   * @param preserveNodeOrder
+   *          whether same-layer nodes retain declaration order within each connected component
    */
   public LayoutOptions {
     if (direction == null)
@@ -82,6 +136,8 @@ public record LayoutOptions(Direction direction, double nodeWidth, double nodeHe
     private double nodeSpacing = 40;
     private double layerSpacing = 80;
     private double groupPadding = 20;
+    private boolean feedbackEdges = false;
+    private boolean preserveNodeOrder = false;
 
     private Builder() {
     }
@@ -151,6 +207,36 @@ public record LayoutOptions(Direction direction, double nodeWidth, double nodeHe
     }
 
     /**
+     * Routes feedback edges around nodes at every nesting level. With RIGHT flow, ordinary incoming
+     * ports remain on the left and outgoing ports on the right, including backward edges. Does not
+     * fix the attachment position along that side or control self-loop ports. Disabled by default.
+     * Custom layout engines decide how to interpret this setting.
+     *
+     * @param value
+     *          whether to enable ELK feedback-edge routing
+     * @return this builder
+     */
+    public Builder feedbackEdges(boolean value) {
+      feedbackEdges = value;
+      return this;
+    }
+
+    /**
+     * Preserves declaration order of real nodes within a layer of each connected component,
+     * including nested graphs. With RIGHT flow this is top-to-bottom order. Layer assignment still
+     * follows the graph; disconnected component packing and edge/port order are not fixed. May
+     * introduce additional crossings. Disabled by default; custom engines interpret the flag.
+     *
+     * @param value
+     *          whether crossing minimization must preserve the node model order
+     * @return this builder
+     */
+    public Builder preserveNodeOrder(boolean value) {
+      preserveNodeOrder = value;
+      return this;
+    }
+
+    /**
      * Validates and captures layout settings.
      *
      * @return immutable settings
@@ -158,7 +244,8 @@ public record LayoutOptions(Direction direction, double nodeWidth, double nodeHe
      *           for null direction or invalid dimensions or spacing
      */
     public LayoutOptions build() {
-      return new LayoutOptions(direction, width, height, nodeSpacing, layerSpacing, groupPadding);
+      return new LayoutOptions(direction, width, height, nodeSpacing, layerSpacing, groupPadding,
+          feedbackEdges, preserveNodeOrder);
     }
   }
 }

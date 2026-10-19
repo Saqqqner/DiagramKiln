@@ -6,8 +6,8 @@ Verified locally on October 20, 2026, on Windows with Temurin JDK 17.0.20.1 and
 JDK 21.0.12.1, using Maven Wrapper 3.9.11. The checks cover explicit leaf dimensions,
 the reusable `DrawioExport` result and the opt-in API compatibility profile.
 
-- The main suite contains 94 tests; the separate packaged Maven consumer has two tests.
-  Clean ordinary `verify` passes on both JDK 17 and 21, including strict Javadoc and formatting.
+- The main suite contains 106 tests; the separate packaged Maven consumer has two tests.
+  `verify` passes on both JDK 17 and 21, including strict Javadoc and formatting.
   Coverage includes mixed shapes and sizes, all layout directions, nested groups,
   cross-group/self/parallel connections, immutable snapshots and custom layout geometry.
 - Paired exports use one layout invocation and return XML that exactly matches the
@@ -34,6 +34,24 @@ topology still requires zooming to read individual labels.
 A separate native file-open check could not be completed through the browser's file chooser.
 The XML and URL payload are verified to contain the same model by automated decoding tests.
 Remote GitHub Actions have not been run as part of these local checks.
+
+### Feedback edges and node order
+
+The layout DSL now exposes `feedbackEdges` and `preserveNodeOrder`, both disabled by default.
+Regression coverage verifies legacy constructors, exporter configuration snapshots, feedback
+routes in all four directions, XML entry/exit anchors, same-layer node order in RIGHT/DOWN
+flow, nested groups, cross-group connections and self-loops. The pinned ELK 0.11.0 hierarchy
+importer initializes its maximum model-order bound only at the root; the adapter seeds
+that bound for nested graphs before import. A regression test reproduces the former null
+unboxing failure and verifies nested ordering after the workaround.
+
+`examples/OrderStatusDiagram.java` compiles against the packaged JAR with Java 17 and exports
+XML plus a matching URL. In draw.io, the backward transition from rejected to draft enters
+the left side of draft. Approved appears above rejected in the same layer, matching node
+declaration order. Node ordering does not constrain layer assignment or disconnected
+component packing, and feedback routing does not force one shared center attachment.
+The updated fixture is [order-status.drawio](../examples/order-status.drawio), with a
+[browser preview](../examples/order-status-preview.png).
 
 ## Version 1.0.0 validation history
 

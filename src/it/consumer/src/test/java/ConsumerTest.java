@@ -77,7 +77,10 @@ class ConsumerTest {
             .jumpStyle(JumpStyle.GAP).jumpSize(6).build())
         .edge("first", "second", "groups").build();
     var options = LayoutOptions.builder().direction(Direction.DOWN).nodeSize(200, 80)
-        .nodeSpacing(50).layerSpacing(100).groupPadding(24).build();
+        .nodeSpacing(50).layerSpacing(100).groupPadding(24).feedbackEdges(true)
+        .preserveNodeOrder(true).build();
+    assertTrue(options.feedbackEdges());
+    assertTrue(options.preserveNodeOrder());
     String xml = DrawioExporter.builder().layoutOptions(options).build().toXml(data);
     var factory = DocumentBuilderFactory.newInstance();
     factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);

@@ -2,6 +2,8 @@ package io.github.saqqqner.diagramkiln.layout;
 
 import org.eclipse.elk.alg.layered.options.LayeredMetaDataProvider;
 import org.eclipse.elk.alg.layered.options.LayeredOptions;
+import org.eclipse.elk.alg.layered.options.InternalProperties;
+import org.eclipse.elk.alg.layered.options.OrderingStrategy;
 import org.eclipse.elk.core.RecursiveGraphLayoutEngine;
 import org.eclipse.elk.core.data.LayoutMetaDataService;
 import org.eclipse.elk.core.math.ElkPadding;
@@ -75,6 +77,14 @@ public final class ElkLayout implements LayoutEngine {
         elk.setDimensions(options.nodeWidth(), options.nodeHeight());
       elkNodes.put(node.id(), elk);
     }
+    if (options.preserveNodeOrder()) {
+      // ELK 0.11 initializes this bound only on the root during hierarchical import.
+      // Nested model-order comparators also require it; imported node indices are global.
+      for (var node : elkNodes.values()) {
+        if (!node.getChildren().isEmpty())
+          node.setProperty(InternalProperties.MAX_MODEL_ORDER_NODES, elkNodes.size());
+      }
+    }
     var elkEdges = new ArrayList<ElkEdge>();
     for (var edge : index.edges()) {
       var elk = ElkGraphUtil.createSimpleEdge(elkNodes.get(edge.sourceId()),
@@ -118,6 +128,12 @@ public final class ElkLayout implements LayoutEngine {
         org.eclipse.elk.core.options.Direction.valueOf(options.direction().name()));
     node.setProperty(CoreOptions.HIERARCHY_HANDLING, HierarchyHandling.INCLUDE_CHILDREN);
     node.setProperty(CoreOptions.EDGE_ROUTING, EdgeRouting.ORTHOGONAL);
+    node.setProperty(LayeredOptions.FEEDBACK_EDGES, options.feedbackEdges());
+    if (options.preserveNodeOrder()) {
+      node.setProperty(LayeredOptions.CONSIDER_MODEL_ORDER_STRATEGY,
+          OrderingStrategy.NODES_AND_EDGES);
+      node.setProperty(LayeredOptions.CROSSING_MINIMIZATION_FORCE_NODE_MODEL_ORDER, true);
+    }
     node.setProperty(CoreOptions.SPACING_NODE_NODE, options.nodeSpacing());
     node.setProperty(LayeredOptions.SPACING_NODE_NODE_BETWEEN_LAYERS, options.layerSpacing());
   }

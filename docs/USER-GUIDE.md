@@ -144,6 +144,8 @@ var layout = LayoutOptions.builder()
     .nodeSpacing(50)
     .layerSpacing(100)
     .groupPadding(24)
+    .feedbackEdges(true)
+    .preserveNodeOrder(true)
     .build();
 
 var exporter = DrawioExporter.builder().layoutOptions(layout).build();
@@ -156,6 +158,24 @@ ELK may enlarge gaps to accommodate routes. `groupPadding` is the inner padding 
 groups; top padding is added below the header. Empty groups retain leaf dimensions plus header height.
 Spacing and padding are finite nonnegative pixels; leaf dimensions are strictly positive.
 Defaults: RIGHT, 160 by 60, spacing 40/80 and padding 20. Built settings are immutable.
+
+`feedbackEdges` defaults to `false`. Set it to `true` to enable ELK Layered's
+`org.eclipse.elk.layered.feedbackEdges` option at every nesting level. ELK assigns ordinary
+input/output sides before cycle breaking, so backward transitions route around nodes.
+For RIGHT flow, ordinary transitions enter from the left and leave from the right; the
+sides rotate with the chosen direction. This does not force a single center attachment,
+control self-loop ports or impose explicit constraints on group boundary ports. Custom
+layout engines receive the flag and decide how to interpret it. Both the three-argument
+and six-argument constructors remain available and disable feedback routing.
+
+`preserveNodeOrder(true)` preserves declaration order of real nodes within a layer of each
+connected component, including nested groups. For RIGHT flow this is top to bottom; for
+DOWN flow, left to right. Layer assignment still follows the topology. This is not a global
+node sequence, an edge/port ordering constraint or a disconnected-component packing rule.
+The default is `false`. In the bundled ELK adapter it enables `NODES_AND_EDGES` model-order
+preprocessing and forces node order during crossing minimization, potentially adding crossings.
+Custom engines decide how to interpret the flag. Legacy constructors disable node-order
+preservation.
 
 The direction(), nodeSize() methods and the three-argument LayoutOptions constructor remain
 available. The last exporter-builder setting wins: layoutOptions() replaces all fields, while a

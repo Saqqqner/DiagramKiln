@@ -131,6 +131,8 @@ var layout = LayoutOptions.builder()
     .nodeSpacing(50)
     .layerSpacing(100)
     .groupPadding(24)
+    .feedbackEdges(true)
+    .preserveNodeOrder(true)
     .build();
 
 var exporter = DrawioExporter.builder().layoutOptions(layout).build();
@@ -140,6 +142,15 @@ String xml = exporter.toXml(diagram);
 Layout defaults are left-to-right flow, 160 × 60 pixel nodes, 40 pixel node spacing,
 80 pixel layer spacing and 20 pixel group padding. Increase node size for long labels;
 text does not resize nodes automatically.
+
+Enable `feedbackEdges(true)` to route backward transitions around nodes while preserving
+flow-side connections. With RIGHT flow, ordinary edges enter on the left and leave on the
+right, including backward transitions. This does not pin a shared center point or control
+self-loop ports. The default is `false`.
+
+Enable `preserveNodeOrder(true)` to keep declaration order within a layer of each connected
+component (top to bottom for RIGHT flow). Layers still follow connections; edge order and
+disconnected component packing remain automatic. Preserving node order may add crossings.
 
 Override the size of individual nodes without changing the others:
 

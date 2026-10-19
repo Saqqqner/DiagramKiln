@@ -2,6 +2,8 @@
 
 ## Unreleased — 1.1.0-SNAPSHOT
 
+- Optional feedback-edge routing in the layout DSL for backward transitions.
+- Optional preservation of declared node order within layers, including nested groups.
 - Explicit per-node dimensions in the DSL and application DTOs, with global layout fallback.
 - Eager paired XML and URL-fragment export from one layout execution.
 - Opt-in API compatibility verification against 1.0.1, with a release-only workflow.

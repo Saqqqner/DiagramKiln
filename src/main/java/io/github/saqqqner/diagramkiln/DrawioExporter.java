@@ -96,6 +96,8 @@ public final class DrawioExporter {
     private double nodeSpacing = 40;
     private double layerSpacing = 80;
     private double groupPadding = 20;
+    private boolean feedbackEdges = false;
+    private boolean preserveNodeOrder = false;
 
     private Builder() {
     }
@@ -158,6 +160,8 @@ public final class DrawioExporter {
       nodeSpacing = options.nodeSpacing();
       layerSpacing = options.layerSpacing();
       groupPadding = options.groupPadding();
+      feedbackEdges = options.feedbackEdges();
+      preserveNodeOrder = options.preserveNodeOrder();
       return this;
     }
 
@@ -171,8 +175,8 @@ public final class DrawioExporter {
     public DrawioExporter build() {
       if (layout == null)
         throw new IllegalArgumentException("layout engine must not be null");
-      return new DrawioExporter(layout,
-          new LayoutOptions(direction, width, height, nodeSpacing, layerSpacing, groupPadding));
+      return new DrawioExporter(layout, new LayoutOptions(direction, width, height, nodeSpacing,
+          layerSpacing, groupPadding, feedbackEdges, preserveNodeOrder));
     }
   }
 }
