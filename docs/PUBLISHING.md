@@ -1,9 +1,9 @@
 # Release and publication
 
 Local release coordinates: `io.github.saqqqner:diagram-kiln:1.0.0`.
-Branches: main and dev. First release tag: `1.0.0` (without a prefix). Both branches start at the
-released state. A subsequent development version has not been assigned. Continue development
-on dev; main contains the released state.
+The `main` branch and tag `1.0.0` contain the release. The `dev` branch develops
+`1.1.0-SNAPSHOT`. Tags use no prefix. Run the build on the matching branch to select
+release or snapshot coordinates.
 
 Remote publication is not configured. Artifacts are installed in the local Maven repository.
 
@@ -21,7 +21,8 @@ consumes the packaged artifact and its transitive dependencies. It produces:
 - target/diagram-kiln-1.0.0-javadoc.jar
 
 The local release bundle is target/releases/diagram-kiln-1.0.0.zip: three JARs, the POM,
-README, LICENSE, changelog and SHA256SUMS. Generated target contents are excluded from Git.
+README, LICENSE, changelog, documentation, examples and SHA256SUMS.
+Generated target contents are excluded from Git.
 
 The project uses the MIT License. The main JAR includes META-INF/LICENSE and the POM declares MIT.
 
