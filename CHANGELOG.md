@@ -2,6 +2,7 @@
 
 ## Unreleased — 1.1.0-SNAPSHOT
 
+- Internal implementation organized into XML, validation and geometry packages.
 - Optional feedback-edge routing in the layout DSL for backward transitions.
 - Optional preservation of declared node order within layers, including nested groups.
 - Explicit per-node dimensions in the DSL and application DTOs, with global layout fallback.

@@ -1,11 +1,15 @@
-package io.github.saqqqner.diagramkiln.internal;
+package io.github.saqqqner.diagramkiln.internal.validation;
 
 import io.github.saqqqner.diagramkiln.DiagramData;
 import io.github.saqqqner.diagramkiln.DiagramEdge;
 import io.github.saqqqner.diagramkiln.DiagramGroup;
 import io.github.saqqqner.diagramkiln.DiagramNode;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Internal traversal index. Input must already be an acyclic, immutable tree.

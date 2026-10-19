@@ -12,7 +12,7 @@ import io.github.saqqqner.diagramkiln.config.LayoutOptions;
 import io.github.saqqqner.diagramkiln.dto.LayoutResult;
 import io.github.saqqqner.diagramkiln.dto.Point;
 import io.github.saqqqner.diagramkiln.dto.PositionedNode;
-import io.github.saqqqner.diagramkiln.internal.DiagramIndex;
+import io.github.saqqqner.diagramkiln.internal.validation.DiagramIndex;
 import io.github.saqqqner.diagramkiln.style.GroupStyle;
 import io.github.saqqqner.diagramkiln.style.NodeShape;
 import io.github.saqqqner.diagramkiln.style.NodeStyle;

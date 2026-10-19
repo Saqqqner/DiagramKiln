@@ -1,4 +1,4 @@
-package io.github.saqqqner.diagramkiln.internal;
+package io.github.saqqqner.diagramkiln.internal.xml;
 
 import java.io.ByteArrayOutputStream;
 import java.net.URLEncoder;

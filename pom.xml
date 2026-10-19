@@ -145,7 +145,7 @@
           <notimestamp>true</notimestamp>
           <failOnWarnings>true</failOnWarnings>
           <doclint>all</doclint>
-          <excludePackageNames>io.github.saqqqner.diagramkiln.internal</excludePackageNames>
+          <excludePackageNames>io.github.saqqqner.diagramkiln.internal:io.github.saqqqner.diagramkiln.internal.*</excludePackageNames>
           <detectJavaApiLink>false</detectJavaApiLink>
           <offlineLinks/>
         </configuration>

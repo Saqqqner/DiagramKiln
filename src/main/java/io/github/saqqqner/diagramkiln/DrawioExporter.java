@@ -2,8 +2,8 @@ package io.github.saqqqner.diagramkiln;
 
 import io.github.saqqqner.diagramkiln.config.Direction;
 import io.github.saqqqner.diagramkiln.config.LayoutOptions;
-import io.github.saqqqner.diagramkiln.internal.DiagramValidator;
-import io.github.saqqqner.diagramkiln.internal.DrawioXmlWriter;
+import io.github.saqqqner.diagramkiln.internal.validation.DiagramValidator;
+import io.github.saqqqner.diagramkiln.internal.xml.DrawioXmlWriter;
 import io.github.saqqqner.diagramkiln.layout.ElkLayout;
 import io.github.saqqqner.diagramkiln.layout.LayoutEngine;
 

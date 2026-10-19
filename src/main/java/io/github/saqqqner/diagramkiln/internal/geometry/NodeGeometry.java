@@ -1,4 +1,4 @@
-package io.github.saqqqner.diagramkiln.internal;
+package io.github.saqqqner.diagramkiln.internal.geometry;
 
 import io.github.saqqqner.diagramkiln.DiagramGroup;
 import io.github.saqqqner.diagramkiln.DiagramNode;

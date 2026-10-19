@@ -23,9 +23,9 @@ import io.github.saqqqner.diagramkiln.dto.LayoutResult;
 import io.github.saqqqner.diagramkiln.dto.Point;
 import io.github.saqqqner.diagramkiln.dto.PositionedNode;
 import io.github.saqqqner.diagramkiln.dto.RoutedEdge;
-import io.github.saqqqner.diagramkiln.internal.DiagramIndex;
-import io.github.saqqqner.diagramkiln.internal.DiagramValidator;
-import io.github.saqqqner.diagramkiln.internal.NodeGeometry;
+import io.github.saqqqner.diagramkiln.internal.validation.DiagramIndex;
+import io.github.saqqqner.diagramkiln.internal.validation.DiagramValidator;
+import io.github.saqqqner.diagramkiln.internal.geometry.NodeGeometry;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

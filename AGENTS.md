@@ -8,7 +8,8 @@ into editable draw.io XML, using ELK for layout. Maven coordinates are
 
 - `src/main/java/io/github/saqqqner/diagramkiln`: public input interfaces, DSL and exporter.
 - `config`, `dto`, `style`, `layout`: layout settings, immutable data, appearance and layout engines.
-- `internal`: validation, indexing, geometry and XML/compression implementation; not public API.
+- `internal.xml`, `internal.validation`, `internal.geometry`: XML/compression, validation/indexing
+  and shape geometry implementation; not public API.
 - `src/test/java`: library tests; `src/it/consumer`: a separate packaged Maven consumer.
 - `examples`: runnable usage examples and draw.io fixtures.
 - `docs/USER-GUIDE.md`: detailed behavior; `docs/CODE-STYLE.md`: coding conventions.

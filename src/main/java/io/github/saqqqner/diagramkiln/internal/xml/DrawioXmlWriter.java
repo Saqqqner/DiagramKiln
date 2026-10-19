@@ -1,4 +1,4 @@
-package io.github.saqqqner.diagramkiln.internal;
+package io.github.saqqqner.diagramkiln.internal.xml;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -7,6 +7,8 @@ import io.github.saqqqner.diagramkiln.dto.LayoutResult;
 import io.github.saqqqner.diagramkiln.dto.Point;
 import io.github.saqqqner.diagramkiln.dto.PositionedNode;
 import io.github.saqqqner.diagramkiln.dto.RoutedEdge;
+import io.github.saqqqner.diagramkiln.internal.validation.DiagramIndex;
+import io.github.saqqqner.diagramkiln.internal.validation.GeometryValidator;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;

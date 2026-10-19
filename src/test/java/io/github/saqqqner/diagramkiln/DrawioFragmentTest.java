@@ -15,7 +15,7 @@ import io.github.saqqqner.diagramkiln.dto.LayoutResult;
 import io.github.saqqqner.diagramkiln.dto.Point;
 import io.github.saqqqner.diagramkiln.dto.PositionedNode;
 import io.github.saqqqner.diagramkiln.dto.RoutedEdge;
-import io.github.saqqqner.diagramkiln.internal.DrawioXmlWriter;
+import io.github.saqqqner.diagramkiln.internal.xml.DrawioXmlWriter;
 import io.github.saqqqner.diagramkiln.style.EdgeStyle;
 import io.github.saqqqner.diagramkiln.style.JumpStyle;
 import static org.junit.jupiter.api.Assertions.assertEquals;

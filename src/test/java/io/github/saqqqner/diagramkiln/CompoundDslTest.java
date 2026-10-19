@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import io.github.saqqqner.diagramkiln.dto.DefaultGroup;
-import io.github.saqqqner.diagramkiln.internal.DiagramIndex;
+import io.github.saqqqner.diagramkiln.internal.validation.DiagramIndex;
 import io.github.saqqqner.diagramkiln.style.GroupStyle;
 import io.github.saqqqner.diagramkiln.style.NodeStyle;
 import static org.junit.jupiter.api.Assertions.assertEquals;

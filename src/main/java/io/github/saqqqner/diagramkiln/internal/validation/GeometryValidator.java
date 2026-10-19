@@ -1,9 +1,10 @@
-package io.github.saqqqner.diagramkiln.internal;
+package io.github.saqqqner.diagramkiln.internal.validation;
 
 import io.github.saqqqner.diagramkiln.DiagramData;
 import io.github.saqqqner.diagramkiln.DiagramGroup;
 import io.github.saqqqner.diagramkiln.dto.LayoutResult;
 import io.github.saqqqner.diagramkiln.dto.PositionedNode;
+import io.github.saqqqner.diagramkiln.internal.geometry.NodeGeometry;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,13 +12,13 @@ import java.util.HashSet;
 /**
  * Checks the layout SPI boundary before constructing a document.
  */
-final class GeometryValidator {
+public final class GeometryValidator {
   private static final double EPSILON = 0.00001;
 
   private GeometryValidator() {
   }
 
-  static void validate(DiagramData data, LayoutResult layout) {
+  public static void validate(DiagramData data, LayoutResult layout) {
     var index = new DiagramIndex(data);
     require(layout != null, "Layout engine returned null");
     require(layout.nodes().size() == index.nodes().size(),

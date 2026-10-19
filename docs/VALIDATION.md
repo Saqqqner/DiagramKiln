@@ -53,6 +53,16 @@ component packing, and feedback routing does not force one shared center attachm
 The updated fixture is [order-status.drawio](../examples/order-status.drawio), with a
 [browser preview](../examples/order-status-preview.png).
 
+### Internal package organization
+
+Implementation classes are grouped under `internal.xml`, `internal.validation` and
+`internal.geometry`; supported API packages remain unchanged. The seven relocated class
+bodies are unchanged apart from imports and the internal visibility required for geometry
+validation across package boundaries. Packaged classes use only the new internal paths,
+and the Javadoc artifact excludes all internal subpackages. The status example's XML is
+byte-for-byte identical before and after relocation. Full verification and the compatibility
+profile continue to cover the packaged consumer and historical public API usage.
+
 ## Version 1.0.0 validation history
 
 Verified locally on October 19, 2026: Windows 11, Temurin JDK 21.0.12.1 and Maven Wrapper 3.9.11.

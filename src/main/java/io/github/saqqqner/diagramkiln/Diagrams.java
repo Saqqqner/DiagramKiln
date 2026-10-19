@@ -6,7 +6,7 @@ import io.github.saqqqner.diagramkiln.dto.DefaultGroup;
 import io.github.saqqqner.diagramkiln.dto.DefaultNode;
 import io.github.saqqqner.diagramkiln.dto.NodeSize;
 import io.github.saqqqner.diagramkiln.dto.SizedNode;
-import io.github.saqqqner.diagramkiln.internal.DiagramValidator;
+import io.github.saqqqner.diagramkiln.internal.validation.DiagramValidator;
 import io.github.saqqqner.diagramkiln.style.EdgeStyle;
 import io.github.saqqqner.diagramkiln.style.GroupStyle;
 import io.github.saqqqner.diagramkiln.style.NodeStyle;

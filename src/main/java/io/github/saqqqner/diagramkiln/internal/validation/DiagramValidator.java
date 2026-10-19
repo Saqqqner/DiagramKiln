@@ -1,4 +1,4 @@
-package io.github.saqqqner.diagramkiln.internal;
+package io.github.saqqqner.diagramkiln.internal.validation;
 
 import io.github.saqqqner.diagramkiln.DiagramData;
 import io.github.saqqqner.diagramkiln.DiagramEdge;

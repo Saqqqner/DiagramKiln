@@ -10,7 +10,9 @@ Public input interfaces, the DSL and exporter entry points live in
 - `dto`: immutable diagram and geometry records.
 - `style`: validated node, group and edge appearance.
 - `layout`: the layout engine contract and ELK adapter.
-- `internal`: validation, indexing, geometry and XML/compression implementation.
+- `internal.xml`: XML serialization, style serialization and compression.
+- `internal.validation`: input snapshots, graph indexing and layout validation.
+- `internal.geometry`: attachment points and shape boundary calculations.
 
 Create subpackages only for responsibilities the library actually has. Keep implementation
 members package-private where possible; expose only what callers or package boundaries need.
