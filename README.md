@@ -1,28 +1,33 @@
 # DiagramKiln
 
-Java 17+ library for generating editable draw.io diagrams: Java DSL or application DTOs →
-hierarchical ELK layout → `.drawio` XML. Supports nested containers, cross-group connections,
-and reusable typed styles.
+Generate editable draw.io diagrams from Java code. Describe nodes and connections using
+a fluent DSL or your own DTOs; DiagramKiln places them with ELK and exports a `.drawio` file.
 
-Release coordinates: **`io.github.saqqqner:diagram-kiln:1.0.0`**.
-Install locally with Maven; remote publication is not configured.
+Useful for status transitions, workflows and diagrams made of interconnected subsystems.
+Requires **Java 17+**.
 
-Java packages and automatic module name: `io.github.saqqqner.diagramkiln`.
-The main API entry points are `Diagrams` and `DrawioExporter`.
-Specifications are in [docs/specs](docs/specs/); implementation plans are in [docs/plans](docs/plans/).
+- Automatic placement and connection routing.
+- Nested groups, with connections between nodes or groups at any depth.
+- Reusable styles for shapes, colors, arrows and line crossings.
+- File export as XML or a compressed `#R` fragment for opening a diagram by URL.
+- Plain Java input contracts; no application framework required.
 
-## Build and consume
+## Install
 
-Requires JDK 17+. The Maven Wrapper pins Maven 3.9.11; an installed Maven 3.9.x also works.
+The current version is **1.0.0**. It is not yet published to a public Maven repository.
+First build and install it from the project root:
 
 ```powershell
 ./mvnw.cmd clean install
 ```
 
-On Linux/macOS: `bash ./mvnw clean install`. The build runs unit tests, strict Javadoc,
-format validation and an isolated Maven consumer. CI is configured for JDK 17 and 21.
+On Linux/macOS:
 
-After local installation:
+```sh
+bash ./mvnw clean install
+```
+
+Then add this dependency to your application's `pom.xml`:
 
 ```xml
 <dependency>
@@ -32,148 +37,91 @@ After local installation:
 </dependency>
 ```
 
-The `target/` directory contains the main JAR, `-sources.jar` and `-javadoc.jar`.
-HTML API documentation is in `target/reports/apidocs/index.html`. Maven resolves runtime dependencies.
+Maven brings in ELK and the other runtime dependencies automatically.
 
-## Basic DSL
+## Create your first diagram
+
+Save this as `OrderDiagram.java` in your application and run its `main` method:
 
 ```java
-import io.github.saqqqner.diagramkiln.DiagramData;
-import io.github.saqqqner.diagramkiln.Diagrams;
-import io.github.saqqqner.diagramkiln.DrawioExporter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import io.github.saqqqner.diagramkiln.Diagrams;
+import io.github.saqqqner.diagramkiln.DrawioExporter;
 
-DiagramData diagram = Diagrams.diagram("Order statuses")
-    .node("new", "New")
-    .node("paid", "Paid")
-    .edge("new", "paid", "Payment")
-    .build();
+public class OrderDiagram {
+  public static void main(String[] args) throws Exception {
+    var diagram = Diagrams.diagram("Order statuses")
+        .node("new", "New")
+        .node("paid", "Paid")
+        .node("shipped", "Shipped")
+        .edge("new", "paid", "Payment received")
+        .edge("paid", "shipped", "Dispatch")
+        .build();
 
-String xml = DrawioExporter.create().toXml(diagram);
-Files.writeString(Path.of("order.drawio"), xml, StandardCharsets.UTF_8);
+    String xml = DrawioExporter.create().toXml(diagram);
+    Files.writeString(Path.of("order.drawio"), xml, StandardCharsets.UTF_8);
+  }
+}
 ```
 
-Open the file in draw.io using File → Open From → Device. ELK computes positions, bend points
-and attachment anchors. Nodes, groups and connections remain editable.
+Open `order.drawio` in draw.io using **File → Open From → Device**.
+Positions and routes are calculated automatically. You can edit the resulting nodes,
+connections and labels in draw.io.
 
-## XML or compressed URL fragment
+## Group related elements
 
-```java
-var exporter = DrawioExporter.create();
-
-String xml = exporter.toXml(diagram);
-String fragment = exporter.toDrawioFragment(diagram); // #R...
-String url = "https://app.diagrams.net/?splash=0" + fragment;
-```
-
-Both methods use the same settings and perform one layout per invocation. `toXml` returns a plain,
-editable `.drawio` document. `toDrawioFragment` returns a URI-safe `#R...` fragment containing the
-complete `mxfile` document. Do not apply another URLEncoder pass to the returned fragment.
-
-Encoding is compatible with the draw.io decoder: UTF-8 XML → URI encoding → raw DEFLATE without
-a zlib header → Base64 → URI encoding of Base64. The implementation uses JDK `URLEncoder` and
-writes spaces in XML as `%20`. Additional punctuation escapes are valid for draw.io's decoder.
-Inner URI encoding preserves literal percent signs, plus signs, Cyrillic text and emoji.
-The result is a URL fragment, not an XML file with compressed `<diagram>` contents.
-URL length limits depend on the browser and application; use XML files for large diagrams.
-Generating a fragment makes no network requests.
-
-The internal `DrawioXmlWriter` provides `write(...)` and `writeFragment(...)`; application code
-should use `DrawioExporter`. See `examples/DrawioFragmentExample.java` for both outputs.
-Encoding was checked against the [draw.io format documentation](https://github.com/jgraph/drawio/wiki/File-Format#compression).
-
-## Nested groups and styles
+Groups can contain nodes and other groups. Connections can cross group boundaries
+or connect the groups themselves:
 
 ```java
-import io.github.saqqqner.diagramkiln.style.Arrow;
-import io.github.saqqqner.diagramkiln.style.EdgeStyle;
-import io.github.saqqqner.diagramkiln.style.GroupStyle;
-import io.github.saqqqner.diagramkiln.style.NodeShape;
-import io.github.saqqqner.diagramkiln.style.NodeStyle;
-
-var operation = NodeStyle.builder()
-    .fillColor("#E3F2FD").strokeColor("#1565C0").rounded(true).build();
-var material = NodeStyle.builder()
-    .shape(NodeShape.ELLIPSE).fillColor("#FFF3E0").build();
-var section = GroupStyle.builder()
-    .fillColor("#E8F5E9").headerHeight(36).bold(true).build();
-var transfer = EdgeStyle.builder()
-    .strokeColor("#EF6C00").dashed(true).endArrow(Arrow.OPEN).build();
-
-DiagramData diagram = Diagrams.diagram("Iron pickaxe crafting")
-    .group("mining", "Ore mining", section, g -> g
-        .node("drill", "Drilling", operation)
-        .node("ore", "Iron ore", material)
-        .edge("drill", "ore", "Mine"))
-    .group("smelting", "Smelting", section, g -> g
-        .node("furnace", "Furnace", operation)
-        .group("output", "Output", h -> h
-            .node("ingot", "Iron ingot", material))
-        .edge("furnace", "ingot", "Smelt"))
-    .edge("ore", "furnace", "Transfer ore", transfer)
-    .edge("mining", "smelting", "Next stage")
+var diagram = Diagrams.diagram("Order processing")
+    .group("sales", "Sales", group -> group
+        .node("new", "New order")
+        .node("paid", "Paid")
+        .edge("new", "paid", "Payment"))
+    .group("warehouse", "Warehouse", group -> group
+        .node("packed", "Packed")
+        .node("shipped", "Shipped")
+        .edge("packed", "shipped", "Dispatch"))
+    .edge("paid", "packed", "Prepare order")
+    .edge("sales", "warehouse", "Handover")
     .build();
 ```
 
-Groups can nest recursively. Embed completed data with `group("id", nestedDiagram)` or
-`group("id", nestedDiagram, groupStyle)`. The root `sectionName` is the page name. Add one
-outer group to draw a frame around the complete process, as in `examples/NestedCraftingDiagram.java`.
+Node and group IDs must be unique across the whole diagram. Use IDs for connections;
+labels are the text shown to the reader. Groups can reference nodes declared later.
 
-All ids, including group ids, must be globally unique within the complete tree. Edge endpoints
-may reference leaves or groups at any depth. Connection cycles, self-loops, parallel edges,
-ancestor-descendant connections and empty groups are supported. Ownership cycles are rejected.
+## Customize appearance and layout
 
-Group callbacks run immediately and their contents are captured when the callback returns.
-References are resolved at the outer build(), allowing references to sibling groups declared later.
-Calling a nested builder's own build() validates that independent diagram in its own context.
-
-Styles are immutable and reusable:
-
-| Style | Properties |
-| --- | --- |
-| `NodeStyle` | `shape`, `rounded`, `arcSize`, `fillColor`, `strokeColor`, `strokeWidth`, `dashed`, `fontColor`, `fontSize`, `bold` |
-| `GroupStyle` | Header fill, outline and text appearance; additionally `headerHeight` |
-| `EdgeStyle` | Line color/width/dashes, label color/size/bold, `startArrow`, `endArrow`, `endSize`, `rounded`, `arcSize`, `jumpStyle`, `jumpSize` |
-
-Configure node and connection rounding separately:
-
-```java
-import io.github.saqqqner.diagramkiln.style.JumpStyle;
-
-var status = NodeStyle.builder()
-    .rounded(true).arcSize(12)
-    .fillColor("#DEEBFF").strokeColor("#0052CC")
-    .strokeWidth(2).fontSize(14).bold(true).build();
-var transition = EdgeStyle.builder()
-    .strokeColor("#34495E").strokeWidth(2)
-    .endArrow(Arrow.CLASSIC).endSize(2)
-    .rounded(true).arcSize(20)
-    .jumpStyle(JumpStyle.GAP).jumpSize(6).build();
-```
-
-`NodeStyle.arcSize` is rectangle rounding in percent (0–100, default 15). The effective radius
-is capped at half the smaller dimension; attachment anchors use that radius.
-`EdgeStyle.arcSize` controls bend rounding in pixels (default 20). Both require `rounded(true)`;
-node rounding does not apply to ellipses or diamonds. `endSize` controls the target arrowhead
-(default 6) and is ignored for `Arrow.NONE`.
-
-`JumpStyle` supports `NONE`, `ARC`, `GAP` and `SHARP`. draw.io renders jumps at crossings in
-connection drawing order; jumps do not change ELK routing. `jumpSize` defaults to 6 and is
-interpreted in whole pixels by draw.io. Arrowhead, jump and edge arc sizes must be finite
-and nonnegative.
-
-Shapes: `RECTANGLE`, `ELLIPSE`, `DIAMOND`. Arrowheads: `NONE`, `CLASSIC`, `BLOCK`, `OPEN`, `DIAMOND`.
-Colors use `#RRGGBB`; fill and stroke also accept `none`. Dimensions are in pixels and font sizes
-are in points. Stroke widths and font sizes must be finite and positive; `headerHeight=0` is valid.
-DSL calls without an explicit style use defaults().
-
-## Layout DSL
+Create styles once and reuse them across diagrams:
 
 ```java
 import io.github.saqqqner.diagramkiln.config.Direction;
 import io.github.saqqqner.diagramkiln.config.LayoutOptions;
+import io.github.saqqqner.diagramkiln.style.Arrow;
+import io.github.saqqqner.diagramkiln.style.EdgeStyle;
+import io.github.saqqqner.diagramkiln.style.JumpStyle;
+import io.github.saqqqner.diagramkiln.style.NodeStyle;
+
+var status = NodeStyle.builder()
+    .fillColor("#DEEBFF").strokeColor("#0052CC")
+    .rounded(true).arcSize(12)
+    .fontSize(14).bold(true)
+    .build();
+
+var transition = EdgeStyle.builder()
+    .strokeColor("#34495E").strokeWidth(2)
+    .endArrow(Arrow.CLASSIC).endSize(6)
+    .rounded(true).jumpStyle(JumpStyle.GAP).jumpSize(6)
+    .build();
+
+var diagram = Diagrams.diagram("Order statuses")
+    .node("new", "New", status)
+    .node("paid", "Paid", status)
+    .edge("new", "paid", "Payment", transition)
+    .build();
 
 var layout = LayoutOptions.builder()
     .direction(Direction.RIGHT)
@@ -187,107 +135,54 @@ var exporter = DrawioExporter.builder().layoutOptions(layout).build();
 String xml = exporter.toXml(diagram);
 ```
 
-Settings apply at every nesting level. `nodeSpacing` is the minimum gap between nodes in one
-layer; `layerSpacing` is the minimum gap between successive layers along the flow direction.
-ELK may enlarge gaps to accommodate routes. `groupPadding` is the inner padding of nonempty
-groups; top padding is added below the header. Empty groups retain leaf dimensions plus header height.
-Spacing and padding are finite nonnegative pixels; leaf dimensions are strictly positive.
-Defaults: RIGHT, 160 by 60, spacing 40/80 and padding 20. Built settings are immutable.
+Layout defaults are left-to-right flow, 160 × 60 pixel nodes, 40 pixel node spacing,
+80 pixel layer spacing and 20 pixel group padding. Increase node size for long labels;
+text does not resize nodes automatically.
 
-The direction(), nodeSize() methods and the three-argument LayoutOptions constructor remain
-available. The last exporter-builder setting wins: layoutOptions() replaces all fields, while a
-subsequent direction() or nodeSize() call overrides only the respective fields.
+See the [user guide](docs/USER-GUIDE.md) for all style options, group styling and layout details.
 
-Style semantics were checked against [draw.io](https://www.drawio.com/docs/manual/styles/connector-styles/)
-and [mxGraph](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxConstants-js.html).
+## Use your own data
 
-## Application DTOs
+The DSL is optional. Implement `DiagramNode` (`id`, `label`), `DiagramEdge`
+(`sourceId`, `targetId`) and `DiagramData` (`sectionName`, `nodes`, `edges`) with your own
+classes or records, then pass the data to `exporter.toXml(data)`.
+
+Styles and edge labels have defaults. Use `DiagramGroup` for nested data.
+See the [DTO example](docs/USER-GUIDE.md#application-dtos).
+
+## Open a diagram by URL
 
 ```java
-public record StatusNodeDto(String id, String label) implements DiagramNode {}
-
-public record StatusTransitionDto(String sourceId, String targetId, String label)
-    implements DiagramEdge {}
-
-public record StatusDiagramData(
-    String sectionName,
-    List<StatusNodeDto> nodes,
-    List<StatusTransitionDto> edges
-) implements DiagramData {
-  public StatusDiagramData {
-    nodes = nodes == null ? List.of() : List.copyOf(nodes);
-    edges = edges == null ? List.of() : List.copyOf(edges);
-  }
-}
+String fragment = exporter.toDrawioFragment(diagram);
+String url = "https://app.diagrams.net/?splash=0" + fragment;
 ```
 
-Place each public record in its own file. Import interfaces from `io.github.saqqqner.diagramkiln` and
-List from java.util. DiagramData returns wildcard lists, so concrete application list types fit.
-Pass completed data directly to toXml(data) or toDrawioFragment(data); the DSL is optional.
-DiagramNode.style() and DiagramEdge.style() have default implementations. Override them or add
-a style record component to supply custom appearance. Groups implement DiagramGroup with id(),
-diagram() and optionally groupStyle(); the default label comes from the nested sectionName().
+The returned fragment is ready to append to the URL; do not encode it again.
+Generation runs locally. For large diagrams, use `.drawio` files to avoid URL length limits.
 
-Build and export capture deep immutable snapshots. Do not mutate DTOs during capture. Later changes
-to source DTOs or builders do not affect completed results.
+## Examples and documentation
 
-## Custom layout
+- [Order statuses](examples/OrderStatusDiagram.java): a flat diagram.
+- [Nested crafting process](examples/NestedCraftingDiagram.java): groups and cross-group connections.
+- [Thirty-node diagram](examples/ThirtyNodeDiagram.java): a larger example.
+- [Visual styles](examples/VisualStylesDiagram.java): shapes, arrows and line crossings.
+- [XML and URL export](examples/DrawioFragmentExample.java): both output formats.
+- [User guide](docs/USER-GUIDE.md): API details, custom layouts and validation rules.
+- [Validation report](docs/VALIDATION.md): checks and browser previews.
 
-The default engine is ELK Layered with RIGHT direction and 160 by 60 leaves. DOWN, LEFT and UP
-are also available. Containers grow to fit children, padding and headers.
+Each export creates one page. Labels are plain text. Node sizes are fixed; automatic
+text sizing and separate edge-label overlap optimization are not provided.
 
-A custom layout.LayoutEngine receives DiagramData and config.LayoutOptions. It returns a
-LayoutResult with one PositionedNode per leaf **and group**, and one RoutedEdge per connection.
-Rectangles and Points use absolute page coordinates in pixels. First/last route points must lie
-on the visible endpoint boundaries; intermediate points are bends. Edge indices follow root edges()
-first, then nested edges recursively in group order. The exporter validates geometry and converts
-it into parent-relative draw.io coordinates. Internal edges belong to their common container and
-move with it.
+## Development
 
-## Examples and development
+Run `./mvnw.cmd clean verify` on Windows or `bash ./mvnw clean verify` on Linux/macOS.
+The build checks tests, an isolated Maven consumer, strict Javadoc and formatting.
+Format Java with the `formatter:format` goal. See [code style](docs/CODE-STYLE.md) and
+[release instructions](docs/PUBLISHING.md).
 
-```powershell
-./mvnw.cmd package dependency:copy-dependencies "-DincludeScope=runtime"
-javac --release 17 -encoding UTF-8 -cp "target/diagram-kiln-1.0.0.jar;target/dependency/*" -d target/examples examples/NestedCraftingDiagram.java
-java -cp "target/examples;target/diagram-kiln-1.0.0.jar;target/dependency/*" NestedCraftingDiagram
-```
-
-On Linux/macOS, replace the classpath separator `;` with `:`. The nested example produces
-examples/nested-crafting.drawio and accepts an output path as its first argument.
-The flat example is examples/OrderStatusDiagram.java. The 30-node example is
-examples/ThirtyNodeDiagram.java; input details and measurements are in [docs/VALIDATION.md](docs/VALIDATION.md).
-
-examples/VisualStylesDiagram.java produces a real-ELK fixture and a fixed-geometry crossing
-comparison. Browser screenshots are documented in the validation report. Some runnable fixtures
-intentionally use Cyrillic labels and emoji to verify Unicode preservation.
-
-Format Java using `./mvnw.cmd formatter:format`. Follow [docs/CODE-STYLE.md](docs/CODE-STYLE.md);
-verify includes format validation. Public API lives in the base package, with config, dto, style
-and layout subpackages. The internal package is not an application API and is excluded from Javadoc.
-
-## Errors and limitations
-
-IllegalArgumentException covers null required values, blank/duplicate ids, unknown endpoints,
-invalid XML 1.0 characters, invalid styles/dimensions and invalid custom layout geometry. Empty
-labels are allowed. XML infrastructure failures are wrapped in IllegalStateException.
-
-Each export contains one page. Labels are escaped plain text, without HTML interpretation.
-Leaf bounds are fixed; increase nodeSize for longer text or larger fonts. Automatic text
-measurement and independent edge-label overlap optimization are not implemented. Practical
-nesting depth is limited by JVM resources. The default exporter is reusable; custom layout
-engines own their thread-safety contract.
+Public API packages start with `io.github.saqqqner.diagramkiln`; `internal` is not an application API.
+Generated API documentation is available at `target/reports/apidocs/index.html` after a build.
 
 ## License
 
-DiagramKiln is licensed under the [MIT License](LICENSE).
-
-See [docs/PUBLISHING.md](docs/PUBLISHING.md) for release and publication details.
-Remote publication metadata and credentials have not been configured.
-
-Integration references were checked with Context7. Runtime dependencies: ELK 0.11.0, Xbase 2.36.0,
-Guava 33.4.8-jre; tests: JUnit 5.11.4. Xbase is explicit because ELK's published POM omits it;
-Guava is pinned instead of accepting the open transitive range.
-
-References: [ELK Java layout](https://eclipse.dev/elk/documentation/tooldevelopers/usingplainjavalayout.html),
-[ELK hierarchy](https://eclipse.dev/elk/reference/options/org-eclipse-elk-hierarchyHandling.html),
-[draw.io format](https://github.com/jgraph/drawio/wiki/File-Format).
+[MIT](LICENSE).
