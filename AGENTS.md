@@ -11,6 +11,6 @@
 - Build and test with `./mvnw.cmd clean verify` on Windows or `bash ./mvnw clean verify`
   on Unix; format Java with the `formatter:format` goal. The verify lifecycle includes
   a separate packaged consumer under src/it/consumer and strict Javadoc.
-- Write all Javadoc in English. README and user instructions may be in Russian.
+- Write all project documentation and Javadoc in English.
 - Public input contracts and DSL/exporter entry points live at the feature root. Implementation
   responsibilities use `config`, `dto`, `style`, `layout` and `internal` subpackages.

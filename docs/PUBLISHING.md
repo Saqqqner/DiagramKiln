@@ -1,61 +1,60 @@
-# Релиз и публикация
+# Release and publication
 
-Координаты локального релиза: `io.github.saqqqner:diagram-kiln:1.0.0`.
-Ветки: `main` и `dev`; тег первого релиза: `v1.0.0`. Обе ветки начинают с релизного коммита;
-версия следующей разработки пока не назначена. Дальнейшая разработка ведётся в `dev`,
-`main` содержит выпущенное состояние.
-Удалённая публикация не настроена и не выполняется; артефакт устанавливается в локальный Maven-репозиторий.
+Local release coordinates: `io.github.saqqqner:diagram-kiln:1.0.0`.
+Branches: main and dev. First release tag: `1.0.0` (without a prefix). Both branches start at the
+released state. A subsequent development version has not been assigned. Continue development
+on dev; main contains the released state.
 
-## Что уже собирается
+Remote publication is not configured. Artifacts are installed in the local Maven repository.
+
+## Build artifacts
 
 ```powershell
 ./mvnw.cmd clean install
 ```
 
-Команда проверяет Java-код, стили форматирования, строгий Javadoc и отдельный Maven-проект,
-который использует только собранный артефакт и его транзитивные зависимости. Создаются:
+The command checks Java sources, formatting, strict Javadoc and an isolated Maven project that
+consumes the packaged artifact and its transitive dependencies. It produces:
 
-- `target/diagram-kiln-1.0.0.jar`;
-- `target/diagram-kiln-1.0.0-sources.jar`;
-- `target/diagram-kiln-1.0.0-javadoc.jar`.
+- target/diagram-kiln-1.0.0.jar
+- target/diagram-kiln-1.0.0-sources.jar
+- target/diagram-kiln-1.0.0-javadoc.jar
 
-Локальный комплект релиза: `target/releases/diagram-kiln-1.0.0.zip` — три JAR,
-POM, changelog и файл `SHA256SUMS`. Каталог `target` не включается в Git.
+The local release bundle is target/releases/diagram-kiln-1.0.0.zip: three JARs, the POM,
+README, changelog and SHA256SUMS. Generated target contents are excluded from Git.
 
-JAR содержит `Automatic-Module-Name: io.github.saqqqner.diagramkiln`. Полного JPMS module-info нет;
-обычное использование через classpath/Maven поддержано. Зависимости остаются отдельными
-артефактами, их классы не копируются в библиотечный JAR.
+The JAR contains Automatic-Module-Name: io.github.saqqqner.diagramkiln. There is no full JPMS module-info;
+regular classpath/Maven consumption is supported. Runtime dependencies remain separate artifacts;
+their classes are not copied into the library JAR.
 
-Версии build plugins и runtime-зависимостей зафиксированы. `project.build.outputTimestamp`
-фиксирует даты архивных записей, Javadoc генерируется без текущей даты. Воспроизводимость
-означает совпадение артефактов при одинаковых исходниках, JDK и Maven; разные JDK могут
-создавать разный HTML Javadoc. Изменяйте timestamp осознанно при подготовке релиза.
+Build plugin and runtime dependency versions are pinned. project.build.outputTimestamp fixes
+archive entry timestamps and Javadoc omits the generation date. Reproducibility means identical
+artifacts for identical sources, JDK and Maven; different JDKs can generate different Javadoc HTML.
+Update the timestamp deliberately when preparing a release.
 
-## Что потребуется перед публикацией
+## Before remote publication
 
-1. Выбрать лицензию своей библиотеки, добавить её текст и соответствующий `<licenses>` в POM.
-2. Задать реальные URL проекта, SCM и информацию об авторе. Текущая сборка не содержит
-   вымышленных URL, developer и лицензии.
-3. Выбрать репозиторий и подтвердить право публикации namespace `io.github.saqqqner` в его системе.
-4. Использовать согласованную релизную версию и соответствующий тег исходников.
-   Для первого локального релиза назначены `1.0.0` и `v1.0.0`.
-   Если перед удалённой публикацией меняются исходники, собрать и проверить обновлённое состояние;
-   после публикации не перезаписывать содержимое уже выпущенной Maven-версии.
-5. Для Maven Central настроить подпись PGP, токен Central Portal и publication plugin по
-   актуальной документации. Для приватного репозитория настроить его endpoint/server id.
-   Ключи и токены хранить в локальных settings/секретах CI, отдельно от исходников.
-6. Собрать и проверить комплект артефактов, затем отдельно выполнить публикацию.
+1. Select a library license, add its text and configure licenses in the POM.
+2. Set real project/SCM URLs and author metadata. No invented metadata is included.
+3. Select the target repository and confirm publication rights for namespace io.github.saqqqner there.
+4. Use an agreed release version and matching source tag. The first local release uses 1.0.0
+   and tag 1.0.0. Rebuild and verify if sources change before remote publication; never replace
+   the contents of an already published Maven version.
+5. For Maven Central, configure PGP signing, a Central Portal token and the publication plugin
+   according to current documentation. For a private repository, configure its endpoint/server id.
+   Keep keys/tokens in local settings or CI secrets, outside source control.
+6. Verify the complete artifact bundle, then publish as a separate action.
 
-Требования Central: [метаданные, sources, Javadoc, подписи и checksums](https://central.sonatype.org/publish/requirements/),
-[Maven Central Portal plugin](https://central.sonatype.org/publish/publish-portal-maven/).
-Способ подписи и загрузки намеренно выбирается после назначения места публикации.
+Central requirements: [metadata, sources, Javadoc, signatures and checksums](https://central.sonatype.org/publish/requirements/),
+[Central Portal Maven plugin](https://central.sonatype.org/publish/publish-portal-maven/).
+Choose signing/upload configuration after selecting the destination.
 
-## Проверка перед релизом
+## Release checks
 
-`clean verify` включает unit/integration-тесты и отдельный потребитель в `src/it/consumer`.
-Invoker устанавливает проверяемые артефакты в `target/it-repository` и запускает потребитель
-из `target/it`, без зависимости на `target/classes` основного проекта. Локальный Maven-кеш
-используется как источник уже загруженных релизных зависимостей, а не проверяемого snapshot.
+clean verify runs the main tests and the isolated consumer in src/it/consumer. Invoker installs
+the tested artifacts in target/it-repository and runs the consumer from target/it, without using
+the producer's target/classes. The existing local Maven cache supplies release dependencies,
+not a fallback copy of the artifact under test.
 
-CI описан в `.github/workflows/ci.yml`: JDK 17 и 21. Workflow начнёт выполняться после
-помещения исходников в GitHub-репозиторий с включёнными Actions.
+.github/workflows/ci.yml configures JDK 17 and 21. The workflow can run after the source is placed
+in a GitHub repository with Actions enabled.

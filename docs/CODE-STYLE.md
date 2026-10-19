@@ -68,6 +68,8 @@ unless an actual production boundary requires broader access.
 
 ### JavaDoc and comments
 
+Write project documentation and Javadoc in English.
+
 Add JavaDoc or focused comments to public or nontrivial APIs when they clarify a caller-visible contract. Cover relevant role, preconditions, side effects, failure behavior, transaction/idempotency guarantees, or thread/resource ownership. Do not add boilerplate to trivial accessors or repeat a contract in another language.
 
 ## Python
