@@ -21,20 +21,23 @@ consumes the packaged artifact and its transitive dependencies. It produces:
 - target/diagram-kiln-1.0.0-javadoc.jar
 
 The local release bundle is target/releases/diagram-kiln-1.0.0.zip: three JARs, the POM,
-README, changelog and SHA256SUMS. Generated target contents are excluded from Git.
+README, LICENSE, changelog and SHA256SUMS. Generated target contents are excluded from Git.
+
+The project uses the MIT License. The main JAR includes META-INF/LICENSE and the POM declares MIT.
 
 The JAR contains Automatic-Module-Name: io.github.saqqqner.diagramkiln. There is no full JPMS module-info;
 regular classpath/Maven consumption is supported. Runtime dependencies remain separate artifacts;
 their classes are not copied into the library JAR.
 
-Build plugin and runtime dependency versions are pinned. project.build.outputTimestamp fixes
+Build plugin and runtime dependency versions are pinned in the POM properties block. The project
+release version remains the literal Maven coordinate 1.0.0. project.build.outputTimestamp fixes
 archive entry timestamps and Javadoc omits the generation date. Reproducibility means identical
 artifacts for identical sources, JDK and Maven; different JDKs can generate different Javadoc HTML.
 Update the timestamp deliberately when preparing a release.
 
 ## Before remote publication
 
-1. Select a library license, add its text and configure licenses in the POM.
+1. Verify that LICENSE and the MIT license metadata are included in the release bundle.
 2. Set real project/SCM URLs and author metadata. No invented metadata is included.
 3. Select the target repository and confirm publication rights for namespace io.github.saqqqner there.
 4. Use an agreed release version and matching source tag. The first local release uses 1.0.0

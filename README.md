@@ -277,8 +277,12 @@ measurement and independent edge-label overlap optimization are not implemented.
 nesting depth is limited by JVM resources. The default exporter is reusable; custom layout
 engines own their thread-safety contract.
 
-See [docs/PUBLISHING.md](docs/PUBLISHING.md) for release and publication details. License and
-publication metadata have not been configured. No remote publication profile or credentials are included.
+## License
+
+DiagramKiln is licensed under the [MIT License](LICENSE).
+
+See [docs/PUBLISHING.md](docs/PUBLISHING.md) for release and publication details.
+Remote publication metadata and credentials have not been configured.
 
 Integration references were checked with Context7. Runtime dependencies: ELK 0.11.0, Xbase 2.36.0,
 Guava 33.4.8-jre; tests: JUnit 5.11.4. Xbase is explicit because ELK's published POM omits it;

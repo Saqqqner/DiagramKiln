@@ -1,5 +1,6 @@
 import java.io.StringReader;
 import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.util.jar.JarFile;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import io.github.saqqqner.diagramkiln.style.JumpStyle;
 import io.github.saqqqner.diagramkiln.style.NodeShape;
 import io.github.saqqqner.diagramkiln.style.NodeStyle;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ConsumerTest {
@@ -24,6 +26,12 @@ class ConsumerTest {
     try (var jar = new JarFile(location.toFile())) {
       assertEquals("io.github.saqqqner.diagramkiln",
           jar.getManifest().getMainAttributes().getValue("Automatic-Module-Name"));
+      var license = jar.getJarEntry("META-INF/LICENSE");
+      assertNotNull(license);
+      try (var input = jar.getInputStream(license)) {
+        assertTrue(
+            new String(input.readAllBytes(), StandardCharsets.UTF_8).startsWith("MIT License"));
+      }
     }
     var data = Diagrams.diagram("Consumer")
         .group("first", "First",

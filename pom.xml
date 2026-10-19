@@ -7,11 +7,34 @@
   <version>1.0.0</version>
   <name>DiagramKiln</name>
   <description>Java diagram DSL, ELK layout and draw.io XML export</description>
+  <licenses>
+    <license>
+      <name>MIT</name>
+      <url>https://opensource.org/license/mit</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <elk.version>0.11.0</elk.version>
     <junit.version>5.11.4</junit.version>
+    <guava.version>33.4.8-jre</guava.version>
+    <xbase.version>2.36.0</xbase.version>
+    <maven.required.version>[3.9,4)</maven.required.version>
+    <maven-clean-plugin.version>3.4.0</maven-clean-plugin.version>
+    <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+    <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
+    <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
+    <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
+    <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
+    <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
+    <maven-invoker-plugin.version>3.10.1</maven-invoker-plugin.version>
+    <formatter-maven-plugin.version>2.29.0</formatter-maven-plugin.version>
+    <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+    <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
+    <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
+    <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
     <project.build.outputTimestamp>2026-10-19T00:00:00Z</project.build.outputTimestamp>
   </properties>
   <dependencyManagement>
@@ -20,7 +43,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>33.4.8-jre</version>
+        <version>${guava.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -29,7 +52,7 @@
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
-      <version>2.36.0</version>
+      <version>${xbase.version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.elk</groupId>
@@ -44,39 +67,50 @@
     </dependency>
   </dependencies>
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <resource>
+        <directory>${project.basedir}</directory>
+        <targetPath>META-INF</targetPath>
+        <filtering>false</filtering>
+        <includes><include>LICENSE</include></includes>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>3.4.0</version>
+        <version>${maven-clean-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>3.3.1</version>
+        <version>${maven-resources-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-install-plugin</artifactId>
-        <version>3.1.4</version>
+        <version>${maven-install-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
-        <version>3.1.4</version>
+        <version>${maven-deploy-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.5.0</version>
+        <version>${maven-enforcer-plugin.version}</version>
         <executions>
           <execution>
             <id>require-supported-tools</id>
             <goals><goal>enforce</goal></goals>
             <configuration>
               <rules>
-                <requireJavaVersion><version>[17,)</version></requireJavaVersion>
-                <requireMavenVersion><version>[3.9,4)</version></requireMavenVersion>
+                <requireJavaVersion><version>[${maven.compiler.release},)</version></requireJavaVersion>
+                <requireMavenVersion><version>${maven.required.version}</version></requireMavenVersion>
               </rules>
             </configuration>
           </execution>
@@ -85,7 +119,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>3.4.0</version>
+        <version>${maven-source-plugin.version}</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -96,9 +130,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.12.0</version>
+        <version>${maven-javadoc-plugin.version}</version>
         <configuration>
-          <source>17</source>
+          <source>${maven.compiler.release}</source>
           <encoding>UTF-8</encoding>
           <docencoding>UTF-8</docencoding>
           <charset>UTF-8</charset>
@@ -119,7 +153,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-invoker-plugin</artifactId>
-        <version>3.10.1</version>
+        <version>${maven-invoker-plugin.version}</version>
         <configuration>
           <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
           <localRepositoryPath>${project.build.directory}/it-repository</localRepositoryPath>
@@ -138,13 +172,13 @@
       <plugin>
         <groupId>net.revelc.code.formatter</groupId>
         <artifactId>formatter-maven-plugin</artifactId>
-        <version>2.29.0</version>
+        <version>${formatter-maven-plugin.version}</version>
         <configuration>
           <configFile>${project.basedir}/config/java-formatter.xml</configFile>
           <lineEnding>LF</lineEnding>
-          <compilerSource>17</compilerSource>
-          <compilerCompliance>17</compilerCompliance>
-          <compilerTargetPlatform>17</compilerTargetPlatform>
+          <compilerSource>${maven.compiler.release}</compilerSource>
+          <compilerCompliance>${maven.compiler.release}</compilerCompliance>
+          <compilerTargetPlatform>${maven.compiler.release}</compilerTargetPlatform>
           <directories>
             <directory>${project.basedir}/src/main/java</directory>
             <directory>${project.basedir}/src/test/java</directory>
@@ -163,17 +197,17 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.13.0</version>
+        <version>${maven-compiler-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.5.2</version>
+        <version>${maven-surefire-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.4.2</version>
+        <version>${maven-jar-plugin.version}</version>
         <configuration>
           <archive>
             <manifestEntries>
@@ -185,7 +219,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.8.1</version>
+        <version>${maven-dependency-plugin.version}</version>
       </plugin>
     </plugins>
   </build>
