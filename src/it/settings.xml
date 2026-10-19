@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0">
+	<profiles>
+		<profile>
+			<id>cached-releases</id>
+			<repositories>
+				<repository>
+					<id>existing-local-cache</id>
+					<url>@localRepositoryUrl@</url>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
+			</repositories>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>existing-local-cache</id>
+					<url>@localRepositoryUrl@</url>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</pluginRepository>
+			</pluginRepositories>
+		</profile>
+	</profiles>
+	<activeProfiles>
+		<activeProfile>cached-releases</activeProfile>
+	</activeProfiles>
+</settings>

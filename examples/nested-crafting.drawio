@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<mxfile compressed="false">
+    <diagram id="page-1" name="Крафт железной кирки">
+        <mxGraphModel>
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="node-0" parent="1" style="swimlane;horizontal=1;container=1;collapsible=0;recursiveResize=0;startSize=28.0;fillColor=#FFFFFF;whiteSpace=wrap;html=0;strokeColor=#000000;strokeWidth=1.0;dashed=0;fontColor=#000000;fontSize=12.0;fontStyle=0;" value="Крафт железной кирки" vertex="1">
+                    <mxGeometry as="geometry" height="272.0" width="1055.0" x="12.0" y="12.0"/>
+                </mxCell>
+                <mxCell id="node-1" parent="node-0" style="swimlane;horizontal=1;container=1;collapsible=0;recursiveResize=0;startSize=36.0;fillColor=#E8F5E9;whiteSpace=wrap;html=0;strokeColor=#388E3C;strokeWidth=1.0;dashed=0;fontColor=#000000;fontSize=12.0;fontStyle=1;" value="1. Добыча железной руды" vertex="1">
+                    <mxGeometry as="geometry" height="136.0" width="440.0" x="20.0" y="96.0"/>
+                </mxCell>
+                <mxCell id="node-2" parent="node-1" style="shape=rectangle;rounded=1;arcSize=15;absoluteArcSize=0;fillColor=#E3F2FD;whiteSpace=wrap;html=0;strokeColor=#1565C0;strokeWidth=1.0;dashed=0;fontColor=#000000;fontSize=12.0;fontStyle=1;" value="Бурение" vertex="1">
+                    <mxGeometry as="geometry" height="60.0" width="160.0" x="20.0" y="56.0"/>
+                </mxCell>
+                <mxCell id="node-3" parent="node-1" style="shape=ellipse;rounded=0;arcSize=15;absoluteArcSize=0;fillColor=#FFF3E0;whiteSpace=wrap;html=0;strokeColor=#E65100;strokeWidth=1.0;dashed=0;fontColor=#000000;fontSize=12.0;fontStyle=0;" value="Железная руда" vertex="1">
+                    <mxGeometry as="geometry" height="60.0" width="160.0" x="260.0" y="56.0"/>
+                </mxCell>
+                <mxCell id="node-4" parent="node-0" style="swimlane;horizontal=1;container=1;collapsible=0;recursiveResize=0;startSize=36.0;fillColor=#E8F5E9;whiteSpace=wrap;html=0;strokeColor=#388E3C;strokeWidth=1.0;dashed=0;fontColor=#000000;fontSize=12.0;fontStyle=1;" value="2. Переплавка железной руды" vertex="1">
+                    <mxGeometry as="geometry" height="204.0" width="485.0" x="550.0" y="48.0"/>
+                </mxCell>
+                <mxCell id="node-5" parent="node-4" style="shape=rectangle;rounded=1;arcSize=15;absoluteArcSize=0;fillColor=#E3F2FD;whiteSpace=wrap;html=0;strokeColor=#1565C0;strokeWidth=1.0;dashed=0;fontColor=#000000;fontSize=12.0;fontStyle=1;" value="Загрузить печь" vertex="1">
+                    <mxGeometry as="geometry" height="60.0" width="160.0" x="20.0" y="104.0"/>
+                </mxCell>
+                <mxCell id="node-6" parent="node-4" style="swimlane;horizontal=1;container=1;collapsible=0;recursiveResize=0;startSize=28.0;fillColor=#FFFFFF;whiteSpace=wrap;html=0;strokeColor=#000000;strokeWidth=1.0;dashed=0;fontColor=#000000;fontSize=12.0;fontStyle=0;" value="Результат" vertex="1">
+                    <mxGeometry as="geometry" height="128.0" width="200.0" x="265.0" y="56.0"/>
+                </mxCell>
+                <mxCell id="node-7" parent="node-6" style="shape=ellipse;rounded=0;arcSize=15;absoluteArcSize=0;fillColor=#FFF3E0;whiteSpace=wrap;html=0;strokeColor=#E65100;strokeWidth=1.0;dashed=0;fontColor=#000000;fontSize=12.0;fontStyle=0;" value="Железный слиток" vertex="1">
+                    <mxGeometry as="geometry" height="60.0" width="160.0" x="20.0" y="48.0"/>
+                </mxCell>
+                <mxCell edge="1" id="edge-0" parent="node-0" source="node-3" style="noEdgeStyle=1;orthogonalLoop=0;rounded=0;exitPerimeter=0;entryPerimeter=0;startArrow=none;endArrow=open;startFill=1;endFill=1;whiteSpace=wrap;html=0;strokeColor=#EF6C00;strokeWidth=1.0;dashed=1;fontColor=#000000;fontSize=12.0;fontStyle=0;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;" target="node-5" value="Передать руду">
+                    <mxGeometry as="geometry" relative="1"/>
+                </mxCell>
+                <mxCell edge="1" id="edge-1" parent="node-0" source="node-1" style="noEdgeStyle=1;orthogonalLoop=0;rounded=0;exitPerimeter=0;entryPerimeter=0;startArrow=none;endArrow=block;startFill=1;endFill=1;whiteSpace=wrap;html=0;strokeColor=#1976D2;strokeWidth=2.0;dashed=0;fontColor=#000000;fontSize=12.0;fontStyle=0;exitX=1.0;exitY=0.7058823529411765;entryX=0.0;entryY=0.7058823529411765;" target="node-4" value="">
+                    <mxGeometry as="geometry" relative="1"/>
+                </mxCell>
+                <mxCell edge="1" id="edge-2" parent="node-1" source="node-2" style="noEdgeStyle=1;orthogonalLoop=0;rounded=0;exitPerimeter=0;entryPerimeter=0;startArrow=none;endArrow=block;startFill=1;endFill=1;whiteSpace=wrap;html=0;strokeColor=#000000;strokeWidth=1.0;dashed=0;fontColor=#000000;fontSize=12.0;fontStyle=0;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;" target="node-3" value="Добыть">
+                    <mxGeometry as="geometry" relative="1"/>
+                </mxCell>
+                <mxCell edge="1" id="edge-3" parent="node-4" source="node-5" style="noEdgeStyle=1;orthogonalLoop=0;rounded=0;exitPerimeter=0;entryPerimeter=0;startArrow=none;endArrow=block;startFill=1;endFill=1;whiteSpace=wrap;html=0;strokeColor=#000000;strokeWidth=1.0;dashed=0;fontColor=#000000;fontSize=12.0;fontStyle=0;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;" target="node-7" value="Переплавить">
+                    <mxGeometry as="geometry" relative="1"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<mxfile compressed="false">
+    <diagram id="page-1" name="Статусы заказа">
+        <mxGraphModel>
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="node-0" parent="1" style="rounded=0;whiteSpace=wrap;html=0;" value="Новый" vertex="1">
+                    <mxGeometry as="geometry" height="60.0" width="160.0" x="12.0" y="32.0"/>
+                </mxCell>
+                <mxCell id="node-1" parent="1" style="rounded=0;whiteSpace=wrap;html=0;" value="В обработке" vertex="1">
+                    <mxGeometry as="geometry" height="60.0" width="160.0" x="192.0" y="22.0"/>
+                </mxCell>
+                <mxCell id="node-2" parent="1" style="rounded=0;whiteSpace=wrap;html=0;" value="Завершён" vertex="1">
+                    <mxGeometry as="geometry" height="60.0" width="160.0" x="372.0" y="12.0"/>
+                </mxCell>
+                <mxCell id="node-3" parent="1" style="rounded=0;whiteSpace=wrap;html=0;" value="Отменён" vertex="1">
+                    <mxGeometry as="geometry" height="60.0" width="160.0" x="372.0" y="112.0"/>
+                </mxCell>
+                <mxCell edge="1" id="edge-0" parent="1" source="node-0" style="noEdgeStyle=1;orthogonalLoop=0;rounded=0;html=0;endArrow=block;endFill=1;exitPerimeter=0;entryPerimeter=0;exitX=1.0;exitY=0.3333333333333333;entryX=0.0;entryY=0.5;" target="node-1" value="Принять">
+                    <mxGeometry as="geometry" relative="1"/>
+                </mxCell>
+                <mxCell edge="1" id="edge-1" parent="1" source="node-1" style="noEdgeStyle=1;orthogonalLoop=0;rounded=0;html=0;endArrow=block;endFill=1;exitPerimeter=0;entryPerimeter=0;exitX=1.0;exitY=0.3333333333333333;entryX=0.0;entryY=0.5;" target="node-2" value="Завершить">
+                    <mxGeometry as="geometry" relative="1"/>
+                </mxCell>
+                <mxCell edge="1" id="edge-2" parent="1" source="node-0" style="noEdgeStyle=1;orthogonalLoop=0;rounded=0;html=0;endArrow=block;endFill=1;exitPerimeter=0;entryPerimeter=0;exitX=1.0;exitY=0.6666666666666666;entryX=0.0;entryY=0.6666666666666666;" target="node-3" value="Отменить">
+                    <mxGeometry as="geometry" relative="1">
+                        <Array as="points">
+                            <mxPoint x="182.0" y="72.0"/>
+                            <mxPoint x="182.0" y="152.0"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell edge="1" id="edge-3" parent="1" source="node-1" style="noEdgeStyle=1;orthogonalLoop=0;rounded=0;html=0;endArrow=block;endFill=1;exitPerimeter=0;entryPerimeter=0;exitX=1.0;exitY=0.6666666666666666;entryX=0.0;entryY=0.3333333333333333;" target="node-3" value="Отменить">
+                    <mxGeometry as="geometry" relative="1">
+                        <Array as="points">
+                            <mxPoint x="362.0" y="62.0"/>
+                            <mxPoint x="362.0" y="132.0"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

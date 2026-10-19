@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<mxfile compressed="false">
+    <diagram id="page-1" name="DiagramKiln: XML + #R">
+        <mxGraphModel>
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="node-0" parent="1" style="swimlane;horizontal=1;container=1;collapsible=0;recursiveResize=0;startSize=28.0;fillColor=#FFFFFF;whiteSpace=wrap;html=0;strokeColor=#000000;strokeWidth=1.0;dashed=0;fontColor=#000000;fontSize=12.0;fontStyle=0;" value="Подсистема A" vertex="1">
+                    <mxGeometry as="geometry" height="176.0" width="328.0" x="12.0" y="12.0"/>
+                </mxCell>
+                <mxCell id="node-1" parent="node-0" style="shape=rectangle;rounded=1;arcSize=12.0;absoluteArcSize=0;fillColor=#DEEBFF;whiteSpace=wrap;html=0;strokeColor=#0052CC;strokeWidth=2.0;dashed=0;fontColor=#000000;fontSize=14.0;fontStyle=1;" value="Готовность 100% + &#128640;&#10;! ' ( ) ~ *" vertex="1">
+                    <mxGeometry as="geometry" height="100.0" width="280.0" x="24.0" y="52.0"/>
+                </mxCell>
+                <mxCell id="node-2" parent="1" style="swimlane;horizontal=1;container=1;collapsible=0;recursiveResize=0;startSize=28.0;fillColor=#FFFFFF;whiteSpace=wrap;html=0;strokeColor=#000000;strokeWidth=1.0;dashed=0;fontColor=#000000;fontSize=12.0;fontStyle=0;" value="Подсистема B" vertex="1">
+                    <mxGeometry as="geometry" height="176.0" width="328.0" x="460.0" y="12.0"/>
+                </mxCell>
+                <mxCell id="node-3" parent="node-2" style="shape=rectangle;rounded=1;arcSize=12.0;absoluteArcSize=0;fillColor=#DEEBFF;whiteSpace=wrap;html=0;strokeColor=#0052CC;strokeWidth=2.0;dashed=0;fontColor=#000000;fontSize=14.0;fontStyle=1;" value="Принято &lt;OK&gt; &amp; %20&#10;? # / = &quot;" vertex="1">
+                    <mxGeometry as="geometry" height="100.0" width="280.0" x="24.0" y="52.0"/>
+                </mxCell>
+                <mxCell edge="1" id="edge-0" parent="1" source="node-1" style="noEdgeStyle=1;orthogonalLoop=0;rounded=1;arcSize=20.0;jumpStyle=gap;jumpSize=6.0;endSize=10.0;exitPerimeter=0;entryPerimeter=0;startArrow=none;endArrow=block;startFill=1;endFill=1;whiteSpace=wrap;html=0;strokeColor=#EF6C00;strokeWidth=2.0;dashed=0;fontColor=#000000;fontSize=12.0;fontStyle=0;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;" target="node-3" value="Передать + проверить">
+                    <mxGeometry as="geometry" relative="1"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
