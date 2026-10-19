@@ -4,6 +4,8 @@ import io.github.saqqqner.diagramkiln.dto.DefaultDiagram;
 import io.github.saqqqner.diagramkiln.dto.DefaultEdge;
 import io.github.saqqqner.diagramkiln.dto.DefaultGroup;
 import io.github.saqqqner.diagramkiln.dto.DefaultNode;
+import io.github.saqqqner.diagramkiln.dto.NodeSize;
+import io.github.saqqqner.diagramkiln.dto.SizedNode;
 import io.github.saqqqner.diagramkiln.internal.DiagramValidator;
 import io.github.saqqqner.diagramkiln.style.EdgeStyle;
 import io.github.saqqqner.diagramkiln.style.GroupStyle;
@@ -70,6 +72,48 @@ public final class Diagrams {
      */
     public Builder node(String id, String label, NodeStyle style) {
       nodes.add(new DefaultNode(id, label, style));
+      return this;
+    }
+
+    /**
+     * Adds a node with default appearance and explicit dimensions, validated immediately.
+     *
+     * @param id
+     *          globally unique node id
+     * @param label
+     *          plain text label
+     * @param width
+     *          finite positive width in pixels
+     * @param height
+     *          finite positive height in pixels
+     * @return this builder
+     * @throws IllegalArgumentException
+     *           if either dimension is not finite and positive
+     */
+    public Builder node(String id, String label, double width, double height) {
+      return node(id, label, NodeStyle.defaults(), width, height);
+    }
+
+    /**
+     * Adds a styled leaf with explicit dimensions, validated immediately. The bundled ELK adapter
+     * preserves this size; custom layout engines control their returned bounds.
+     *
+     * @param id
+     *          globally unique node id
+     * @param label
+     *          plain text label
+     * @param style
+     *          non-null node appearance
+     * @param width
+     *          finite positive width in pixels
+     * @param height
+     *          finite positive height in pixels
+     * @return this builder
+     * @throws IllegalArgumentException
+     *           if either dimension is not finite and positive
+     */
+    public Builder node(String id, String label, NodeStyle style, double width, double height) {
+      nodes.add(new SizedNode(id, label, style, new NodeSize(width, height)));
       return this;
     }
 

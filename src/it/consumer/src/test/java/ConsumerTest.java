@@ -1,4 +1,10 @@
 import java.io.StringReader;
+import java.io.ByteArrayInputStream;
+import java.net.URLDecoder;
+import java.util.Base64;
+import java.util.List;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 import java.util.jar.JarFile;
@@ -7,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import io.github.saqqqner.diagramkiln.Diagrams;
 import io.github.saqqqner.diagramkiln.DrawioExporter;
+import io.github.saqqqner.diagramkiln.SizedDiagramNode;
+import io.github.saqqqner.diagramkiln.dto.NodeSize;
 import io.github.saqqqner.diagramkiln.config.Direction;
 import io.github.saqqqner.diagramkiln.config.LayoutOptions;
 import io.github.saqqqner.diagramkiln.style.EdgeStyle;
@@ -18,6 +26,33 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ConsumerTest {
+  record SizedStatus(String id, String label, NodeSize size) implements SizedDiagramNode {
+  }
+
+  @Test
+  void consumesMixedSizesAndReusableResult() throws Exception {
+    var dto = new SizedStatus("dto", "Application DTO", new NodeSize(240, 90));
+    var data = Diagrams.diagram("New API")
+        .group("g", "Group",
+            g -> g.nodes(List.of(dto)).node("leaf", "Leaf", 180, 110).edge("dto", "leaf", ""))
+        .node("default", "Default").edge("g", "default", "Groups").build();
+    var result = DrawioExporter.create().export(data);
+    assertTrue(result.xml().contains("width=\"240.0\""));
+    assertTrue(result.xml().contains("height=\"110.0\""));
+    assertTrue(result.drawioFragment().startsWith("#R"));
+    var inflater = new Inflater(true);
+    byte[] compressed = Base64.getDecoder()
+        .decode(URLDecoder.decode(result.drawioFragment().substring(2), StandardCharsets.UTF_8));
+    try (var input = new InflaterInputStream(new ByteArrayInputStream(compressed), inflater)) {
+      String encodedXml = new String(input.readAllBytes(), StandardCharsets.US_ASCII);
+      assertEquals(result.xml(),
+          URLDecoder.decode(encodedXml.replace("+", "%2B"), StandardCharsets.UTF_8));
+    }
+    finally {
+      inflater.end();
+    }
+  }
+
   @Test
   void consumesPackagedLibraryWithTransitiveElkDependencies() throws Exception {
     var location = Path

@@ -8,12 +8,14 @@ import org.eclipse.elk.core.math.ElkPadding;
 import org.eclipse.elk.core.options.CoreOptions;
 import org.eclipse.elk.core.options.EdgeRouting;
 import org.eclipse.elk.core.options.HierarchyHandling;
+import org.eclipse.elk.core.options.SizeConstraint;
 import org.eclipse.elk.core.util.BasicProgressMonitor;
 import org.eclipse.elk.graph.ElkEdge;
 import org.eclipse.elk.graph.ElkNode;
 import org.eclipse.elk.graph.util.ElkGraphUtil;
 import io.github.saqqqner.diagramkiln.DiagramData;
 import io.github.saqqqner.diagramkiln.DiagramGroup;
+import io.github.saqqqner.diagramkiln.SizedDiagramNode;
 import io.github.saqqqner.diagramkiln.config.LayoutOptions;
 import io.github.saqqqner.diagramkiln.dto.LayoutResult;
 import io.github.saqqqner.diagramkiln.dto.Point;
@@ -63,6 +65,11 @@ public final class ElkLayout implements LayoutEngine {
         if (group.diagram().nodes().isEmpty())
           elk.setDimensions(options.nodeWidth(),
               options.nodeHeight() + group.groupStyle().headerHeight());
+      }
+      else if (node instanceof SizedDiagramNode sized) {
+        var size = sized.size();
+        elk.setProperty(CoreOptions.NODE_SIZE_CONSTRAINTS, SizeConstraint.fixed());
+        elk.setDimensions(size.width(), size.height());
       }
       else
         elk.setDimensions(options.nodeWidth(), options.nodeHeight());

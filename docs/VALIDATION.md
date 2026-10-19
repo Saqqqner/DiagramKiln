@@ -1,5 +1,42 @@
 # Validation report
 
+## Development version 1.1.0-SNAPSHOT
+
+Verified locally on October 20, 2026, on Windows with Temurin JDK 17.0.20.1 and
+JDK 21.0.12.1, using Maven Wrapper 3.9.11. The checks cover explicit leaf dimensions,
+the reusable `DrawioExport` result and the opt-in API compatibility profile.
+
+- The main suite contains 94 tests; the separate packaged Maven consumer has two tests.
+  Clean ordinary `verify` passes on both JDK 17 and 21, including strict Javadoc and formatting.
+  Coverage includes mixed shapes and sizes, all layout directions, nested groups,
+  cross-group/self/parallel connections, immutable snapshots and custom layout geometry.
+- Paired exports use one layout invocation and return XML that exactly matches the
+  independently inflated fragment, including Unicode and large inputs.
+- The JDK 17 compatibility profile compares the packaged JAR with the source-built,
+  pinned 1.0.1 baseline. Historical Java 17 source compiles against the old JAR, its
+  bytecode runs with the new JAR, and the same source compiles against the new JAR.
+- Fourteen analyzer fixtures verify intentional API breaks, compatible additions,
+  internal/private exclusions and strict missing-class handling. Baseline validation
+  and stale-report regression checks also pass.
+- Prepared offline compatibility verification passes with locally cached dependencies.
+  See [API compatibility verification](API-COMPATIBILITY.md) for preparation requirements.
+- Independent reviews of each feature and the combined changes found no remaining
+  actionable findings after correcting stale compatibility-report handling.
+- All six runnable Java examples and all six README Java blocks compile and run against
+  the packaged JAR on JDK 17. Local Markdown links resolve.
+
+The paired URL from `examples/MixedSizeDiagram.java` was opened in draw.io. Nested editable
+groups, cross-group and group-to-group connections, different shapes and explicit dimensions
+display correctly. The Arrange panel confirmed a 240 by 90 node. A second browser fixture
+showed 30 leaves, seven containers and 32 connections with mixed leaf dimensions. Its tall
+topology still requires zooming to read individual labels.
+
+A separate native file-open check could not be completed through the browser's file chooser.
+The XML and URL payload are verified to contain the same model by automated decoding tests.
+Remote GitHub Actions have not been run as part of these local checks.
+
+## Version 1.0.0 validation history
+
 Verified locally on October 19, 2026: Windows 11, Temurin JDK 21.0.12.1 and Maven Wrapper 3.9.11.
 Compilation targets Java 17 through --release 17. CI is configured for JDK 17/21; the remote
 workflow has not run. Public Javadoc is in English.

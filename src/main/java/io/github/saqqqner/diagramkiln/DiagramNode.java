@@ -3,7 +3,7 @@ package io.github.saqqqner.diagramkiln;
 import io.github.saqqqner.diagramkiln.style.NodeStyle;
 
 /**
- * An element of a flat diagram. Ids must be nonblank and unique within the diagram.
+ * An element of a diagram tree. Ids must be nonblank and unique across all nodes and groups.
  */
 public interface DiagramNode {
   /**

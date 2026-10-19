@@ -1,0 +1,56 @@
+name: API compatibility
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: read
+
+jobs:
+  api-compat:
+    name: API compatibility (JDK 17)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: current
+      - uses: actions/checkout@v7
+        with:
+          ref: 9404843d3e27f0baa9c06015b04104e2a83499fd
+          path: baseline-sources
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: |
+            current/pom.xml
+            baseline-sources/pom.xml
+      - name: Build pinned baseline and record provenance
+        working-directory: current
+        run: java tools/ApiCompat.java bootstrap "$PWD" "$PWD/.superpowers/api-compat/baseline" "$GITHUB_WORKSPACE/baseline-sources"
+      - name: Compare supported API and run historical consumer
+        working-directory: current
+        run: >-
+          bash ./mvnw -B -ntp clean verify -Papi-compat
+          "-DapiCompat.baselineJar=$PWD/.superpowers/api-compat/baseline/diagram-kiln-1.0.1.jar"
+          "-DapiCompat.baselineProvenance=$PWD/.superpowers/api-compat/baseline/provenance.properties"
+      - name: Prove analyzer policy and baseline validation
+        working-directory: current
+        run: |
+          java tools/ApiCompatFixtures.java --self-test
+          java tools/ApiCompatFixtures.java .
+          java src/api-compat/BaselineValidationTest.java .
+      - name: Preserve compatibility diagnostics
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: api-compatibility-reports
+          path: |
+            current/target/api-compat/
+            current/.superpowers/api-compat/baseline/bootstrap.log
+            current/.superpowers/api-compat/baseline/provenance.properties
+          if-no-files-found: warn

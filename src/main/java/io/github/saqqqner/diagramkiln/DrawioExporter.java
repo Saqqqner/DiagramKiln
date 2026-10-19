@@ -64,9 +64,25 @@ public final class DrawioExporter {
    *           if the input graph or returned layout geometry is invalid
    */
   public String toDrawioFragment(DiagramData diagram) {
-    var snapshot = DiagramValidator.snapshot(diagram);
-    var result = layout.layout(snapshot, options);
-    return new DrawioXmlWriter().writeFragment(snapshot, result);
+    return new DrawioXmlWriter().writeFragment(toXml(diagram));
+  }
+
+  /**
+   * Eagerly creates matching XML and a URI-safe draw.io fragment from one layout invocation and one
+   * XML serialization. No file or network I/O is performed. Each call is independent; reading the
+   * result performs no further layout or compression. Custom engines retain their existing
+   * thread-safety responsibility. Call {@link #toXml} when only XML is needed, to avoid
+   * compression.
+   *
+   * @param diagram
+   *          non-null tree with globally unique ids; do not mutate during capture
+   * @return two immutable strings describing the same captured input and geometry
+   * @throws IllegalArgumentException
+   *           if input or layout geometry is invalid
+   */
+  public DrawioExport export(DiagramData diagram) {
+    String xml = toXml(diagram);
+    return new DrawioExport(xml, new DrawioXmlWriter().writeFragment(xml));
   }
 
   /**

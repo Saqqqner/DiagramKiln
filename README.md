@@ -141,6 +141,21 @@ Layout defaults are left-to-right flow, 160 × 60 pixel nodes, 40 pixel node spa
 80 pixel layer spacing and 20 pixel group padding. Increase node size for long labels;
 text does not resize nodes automatically.
 
+Override the size of individual nodes without changing the others:
+
+```java
+var diagram = Diagrams.diagram("Services")
+    .node("api", "API with a longer label", 240, 90)
+    .node("db", "Database", status, 180, 110)
+    .node("worker", "Worker")
+    .edge("api", "db", "Query")
+    .build();
+```
+
+Ordinary nodes use the global layout size. Your own DTOs can implement
+`SizedDiagramNode` and return an immutable `NodeSize`; see
+[individual sizes](docs/USER-GUIDE.md#individual-node-sizes).
+
 See the [user guide](docs/USER-GUIDE.md) for all style options, group styling and layout details.
 
 ## Use your own data
@@ -162,6 +177,16 @@ String url = "https://app.diagrams.net/?splash=0" + fragment;
 The returned fragment is ready to append to the URL; do not encode it again.
 Generation runs locally. For large diagrams, use `.drawio` files to avoid URL length limits.
 
+When you need both outputs, reuse one layout and one XML serialization:
+
+```java
+var result = exporter.export(diagram);
+String xml = result.xml();
+String url = "https://app.diagrams.net/?splash=0" + result.drawioFragment();
+```
+
+The completed result is immutable. Calling its accessors does not run layout again.
+
 ## Examples and documentation
 
 - [Order statuses](examples/OrderStatusDiagram.java): a flat diagram.
@@ -169,11 +194,15 @@ Generation runs locally. For large diagrams, use `.drawio` files to avoid URL le
 - [Thirty-node diagram](examples/ThirtyNodeDiagram.java): a larger example.
 - [Visual styles](examples/VisualStylesDiagram.java): shapes, arrows and line crossings.
 - [XML and URL export](examples/DrawioFragmentExample.java): both output formats.
+- [Mixed node sizes](examples/MixedSizeDiagram.java): explicit sizes, nested groups and paired export.
 - [User guide](docs/USER-GUIDE.md): API details, custom layouts and validation rules.
 - [Validation report](docs/VALIDATION.md): checks and browser previews.
 
 Each export creates one page. Labels are plain text. Node sizes are fixed; automatic
 text sizing and separate edge-label overlap optimization are not provided.
+
+API compatibility with `1.0.1` is checked separately from ordinary builds; see
+[compatibility verification](docs/API-COMPATIBILITY.md).
 
 ## Development
 

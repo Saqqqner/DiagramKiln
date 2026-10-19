@@ -34,7 +34,20 @@ public final class DrawioXmlWriter {
    * @return a fragment suitable for appending to a draw.io editor URL
    */
   public String writeFragment(DiagramData data, LayoutResult layout) {
-    return DrawioCompression.fragment(write(data, layout));
+    return writeFragment(write(data, layout));
+  }
+
+  /**
+   * Encodes previously serialized XML without capturing input or running layout again.
+   *
+   * @param xml
+   *          non-null serialized XML
+   * @return a URI-safe #R fragment
+   */
+  public String writeFragment(String xml) {
+    if (xml == null)
+      throw new IllegalArgumentException("XML must not be null");
+    return DrawioCompression.fragment(xml);
   }
 
   public String write(DiagramData data, LayoutResult layout) {

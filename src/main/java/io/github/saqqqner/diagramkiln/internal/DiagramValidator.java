@@ -4,10 +4,12 @@ import io.github.saqqqner.diagramkiln.DiagramData;
 import io.github.saqqqner.diagramkiln.DiagramEdge;
 import io.github.saqqqner.diagramkiln.DiagramGroup;
 import io.github.saqqqner.diagramkiln.DiagramNode;
+import io.github.saqqqner.diagramkiln.SizedDiagramNode;
 import io.github.saqqqner.diagramkiln.dto.DefaultDiagram;
 import io.github.saqqqner.diagramkiln.dto.DefaultEdge;
 import io.github.saqqqner.diagramkiln.dto.DefaultGroup;
 import io.github.saqqqner.diagramkiln.dto.DefaultNode;
+import io.github.saqqqner.diagramkiln.dto.SizedNode;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,6 +57,8 @@ public final class DiagramValidator {
         throw new IllegalArgumentException("nodes must not contain null");
       String id = id(node.id(), "node.id");
       if (node instanceof DiagramGroup group) {
+        if (node instanceof SizedDiagramNode)
+          throw new IllegalArgumentException("group " + id + " must not declare a leaf size");
         var nested = capture(group.diagram(), active);
         var style = group.groupStyle();
         requireStyle(style, "group " + id);
@@ -63,7 +67,15 @@ public final class DiagramValidator {
       else {
         var style = node.style();
         requireStyle(style, "node " + id);
-        nodes.add(new DefaultNode(id, text(node.label(), "node.label"), style));
+        String label = text(node.label(), "node.label");
+        if (node instanceof SizedDiagramNode sized) {
+          var size = sized.size();
+          if (size == null)
+            throw new IllegalArgumentException("node " + id + " size must not be null");
+          nodes.add(new SizedNode(id, label, style, size));
+        }
+        else
+          nodes.add(new DefaultNode(id, label, style));
       }
     }
     for (var edge : inputEdges) {

@@ -17,6 +17,24 @@ Both methods use the same settings and perform one layout per invocation. `toXml
 editable `.drawio` document. `toDrawioFragment` returns a URI-safe `#R...` fragment containing the
 complete `mxfile` document. Do not apply another URLEncoder pass to the returned fragment.
 
+For both outputs from the exact same captured input and layout, use:
+
+```java
+var result = exporter.export(diagram);
+String xml = result.xml();
+String fragment = result.drawioFragment();
+```
+
+`DrawioExport` stores two eagerly computed strings. One `export` invokes the configured
+engine once, serializes XML once, and compresses that XML once. Reading either accessor,
+even concurrently, performs no additional work. The result retains no DTO, layout engine,
+DOM or native compressor. Each new export is independent; there is no diagram cache.
+Existing `toXml` does not compress, and calling the two old methods separately still runs
+layout twice. Custom engines retain their existing thread-safety responsibility.
+
+Only `DrawioExporter.export` guarantees a matching pair. The public record constructor
+rejects null components but accepts arbitrary non-null strings without parsing them.
+
 Encoding is compatible with the draw.io decoder: UTF-8 XML → URI encoding → raw DEFLATE without
 a zlib header → Base64 → URI encoding of Base64. The implementation uses JDK `URLEncoder` and
 writes spaces in XML as `%20`. Additional punctuation escapes are valid for draw.io's decoder.
@@ -146,6 +164,32 @@ subsequent direction() or nodeSize() call overrides only the respective fields.
 Style semantics were checked against [draw.io](https://www.drawio.com/docs/manual/styles/connector-styles/)
 and [mxGraph](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxConstants-js.html).
 
+## Individual node sizes
+
+Use `.node(id, label, width, height)` or `.node(id, label, style, width, height)` to set
+an explicit size for one leaf. Both dimensions are finite positive pixels. The full pair
+replaces the global size from `LayoutOptions`; ordinary leaves keep the global fallback.
+
+Application DTOs can opt in without changing existing interfaces or record constructors:
+
+```java
+import io.github.saqqqner.diagramkiln.SizedDiagramNode;
+import io.github.saqqqner.diagramkiln.dto.NodeSize;
+
+record Service(String id, String label, NodeSize size) implements SizedDiagramNode {}
+```
+
+For example, `new Service("api", "API", new NodeSize(240, 90))` describes a sized leaf.
+`SizedNode` is the supplied DTO, with constructors accepting ID, label, size and optionally
+style. Snapshots preserve the immutable size, including nested and repeated capture.
+A null size from a custom DTO is rejected before layout with its node ID in the error.
+
+Groups grow around their contents; a group implementing `SizedDiagramNode` is rejected.
+Empty groups retain their existing global-size behavior. The bundled ELK adapter preserves
+explicit leaf dimensions for every shape and direction. A custom `LayoutEngine` can inspect
+the capability and choose its own valid final bounds: exported geometry remains authoritative.
+No post-layout resizing is performed, so routed connections retain their attachment points.
+
 ## Application DTOs
 
 ```java
@@ -196,7 +240,8 @@ invalid XML 1.0 characters, invalid styles/dimensions and invalid custom layout 
 labels are allowed. XML infrastructure failures are wrapped in IllegalStateException.
 
 Each export contains one page. Labels are escaped plain text, without HTML interpretation.
-Leaf bounds are fixed; increase nodeSize for longer text or larger fonts. Automatic text
+Leaf bounds are fixed; increase the individual size or global nodeSize for longer text or larger
+fonts. Automatic text
 measurement and independent edge-label overlap optimization are not implemented. Practical
 nesting depth is limited by JVM resources. The default exporter is reusable; custom layout
 engines own their thread-safety contract.
