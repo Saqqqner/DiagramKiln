@@ -56,7 +56,8 @@ that limitation and use available official documentation or source code.
 
 Write all project documentation and Javadoc in English. Keep README focused on library users;
 put advanced usage in `docs/USER-GUIDE.md` and release details in `docs/PUBLISHING.md`.
-Specifications belong in `docs/specs/`; implementation plans belong in `docs/plans/`.
+Keep design specifications and implementation plans in ignored `.superpowers/specs/` and
+`.superpowers/plans/`; do not add them to public repository documentation.
 Keep agent progress journals and temporary verification records in ignored `.superpowers/`.
 Do not commit generated `target/` output, local Maven caches or credentials.
 
