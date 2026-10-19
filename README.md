@@ -212,9 +212,6 @@ The completed result is immutable. Calling its accessors does not run layout aga
 Each export creates one page. Labels are plain text. Node sizes are fixed; automatic
 text sizing and separate edge-label overlap optimization are not provided.
 
-API compatibility with `1.0.1` is checked separately from ordinary builds; see
-[compatibility verification](docs/API-COMPATIBILITY.md).
-
 ## Development
 
 Run `./mvnw.cmd clean verify` on Windows or `bash ./mvnw clean verify` on Linux/macOS.

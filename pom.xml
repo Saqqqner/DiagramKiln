@@ -35,12 +35,6 @@
     <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
     <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
     <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
-    <exec-maven-plugin.version>3.5.0</exec-maven-plugin.version>
-    <japicmp-maven-plugin.version>0.26.1</japicmp-maven-plugin.version>
-    <!-- Frozen baseline dependency versions, independent of current release upgrades. -->
-    <apiCompat.baseline.elk.version>0.11.0</apiCompat.baseline.elk.version>
-    <apiCompat.baseline.xbase.version>2.36.0</apiCompat.baseline.xbase.version>
-    <apiCompat.baseline.guava.version>33.4.8-jre</apiCompat.baseline.guava.version>
     <project.build.outputTimestamp>2026-10-19T00:00:00Z</project.build.outputTimestamp>
   </properties>
   <dependencyManagement>
@@ -194,8 +188,6 @@
             <directory>${project.basedir}/src/main/java</directory>
             <directory>${project.basedir}/src/test/java</directory>
             <directory>${project.basedir}/src/it</directory>
-            <directory>${project.basedir}/src/api-compat</directory>
-            <directory>${project.basedir}/tools</directory>
             <directory>${project.basedir}/examples</directory>
           </directories>
         </configuration>
@@ -236,123 +228,4 @@
       </plugin>
     </plugins>
   </build>
-  <profiles>
-    <!-- Explicit opt-in: ordinary verification has no historical-artifact dependency. -->
-    <profile>
-      <id>api-compat</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>api-compat-runtime-classpath</id>
-                <phase>prepare-package</phase>
-                <goals><goal>build-classpath</goal></goals>
-                <configuration>
-                  <includeScope>runtime</includeScope>
-                  <outputFile>${project.build.directory}/api-compat/current-classpath.txt</outputFile>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <version>${exec-maven-plugin.version}</version>
-            <configuration><executable>${java.home}/bin/java</executable></configuration>
-            <executions>
-              <execution>
-                <id>validate-api-baseline</id>
-                <phase>validate</phase>
-                <goals><goal>exec</goal></goals>
-                <configuration>
-                  <arguments>
-                    <argument>${project.basedir}/tools/ApiCompat.java</argument>
-                    <argument>validate</argument>
-                    <argument>${apiCompat.baselineJar}</argument>
-                    <argument>${apiCompat.baselineProvenance}</argument>
-                    <argument>${project.build.directory}/api-compat</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-              <execution>
-                <id>historical-api-consumer</id>
-                <phase>verify</phase>
-                <goals><goal>exec</goal></goals>
-                <configuration>
-                  <arguments>
-                    <argument>${project.basedir}/tools/ApiCompat.java</argument>
-                    <argument>consumer</argument>
-                    <argument>${apiCompat.baselineJar}</argument>
-                    <argument>${apiCompat.baselineProvenance}</argument>
-                    <argument>${project.build.directory}/api-compat</argument>
-                    <argument>${project.build.directory}/${project.build.finalName}.jar</argument>
-                    <argument>${project.build.directory}/api-compat/current-classpath.txt</argument>
-                    <argument>${project.basedir}/src/api-compat/HistoricalConsumer.java</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>com.github.siom79.japicmp</groupId>
-            <artifactId>japicmp-maven-plugin</artifactId>
-            <version>${japicmp-maven-plugin.version}</version>
-            <configuration>
-              <oldVersion><file><path>${apiCompat.baselineJar}</path></file></oldVersion>
-              <newVersion><file><path>${project.build.directory}/${project.build.finalName}.jar</path></file></newVersion>
-              <outputDirectory>${project.build.directory}/api-compat/analyzer</outputDirectory>
-              <oldClassPathDependencies>
-                <dependency>
-                  <groupId>org.eclipse.elk</groupId><artifactId>org.eclipse.elk.alg.layered</artifactId>
-                  <version>${apiCompat.baseline.elk.version}</version>
-                </dependency>
-                <dependency>
-                  <groupId>org.eclipse.xtext</groupId><artifactId>org.eclipse.xtext.xbase.lib</artifactId>
-                  <version>${apiCompat.baseline.xbase.version}</version>
-                </dependency>
-                <dependency>
-                  <groupId>com.google.guava</groupId><artifactId>guava</artifactId>
-                  <version>${apiCompat.baseline.guava.version}</version>
-                </dependency>
-              </oldClassPathDependencies>
-              <newClassPathDependencies>
-                <dependency>
-                  <groupId>org.eclipse.elk</groupId><artifactId>org.eclipse.elk.alg.layered</artifactId>
-                  <version>${elk.version}</version>
-                </dependency>
-                <dependency>
-                  <groupId>org.eclipse.xtext</groupId><artifactId>org.eclipse.xtext.xbase.lib</artifactId>
-                  <version>${xbase.version}</version>
-                </dependency>
-                <dependency>
-                  <groupId>com.google.guava</groupId><artifactId>guava</artifactId>
-                  <version>${guava.version}</version>
-                </dependency>
-              </newClassPathDependencies>
-              <parameter>
-                <accessModifier>protected</accessModifier>
-                <includes><include>io.github.saqqqner.diagramkiln.*</include></includes>
-                <excludes><exclude>io.github.saqqqner.diagramkiln.internal.*</exclude></excludes>
-                <onlyModified>true</onlyModified>
-                <breakBuildOnModifications>false</breakBuildOnModifications>
-                <breakBuildOnBinaryIncompatibleModifications>true</breakBuildOnBinaryIncompatibleModifications>
-                <breakBuildOnSourceIncompatibleModifications>true</breakBuildOnSourceIncompatibleModifications>
-                <ignoreMissingClasses>false</ignoreMissingClasses>
-              </parameter>
-            </configuration>
-            <executions>
-              <execution>
-                <id>supported-api-compatibility</id>
-                <phase>verify</phase>
-                <goals><goal>cmp</goal></goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>

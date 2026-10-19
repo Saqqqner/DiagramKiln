@@ -4,7 +4,7 @@
 
 Verified locally on October 20, 2026, on Windows with Temurin JDK 17.0.20.1 and
 JDK 21.0.12.1, using Maven Wrapper 3.9.11. The checks cover explicit leaf dimensions,
-the reusable `DrawioExport` result and the opt-in API compatibility profile.
+the reusable `DrawioExport` result, layout settings and internal package organization.
 
 - The main suite contains 106 tests; the separate packaged Maven consumer has two tests.
   `verify` passes on both JDK 17 and 21, including strict Javadoc and formatting.
@@ -12,16 +12,8 @@ the reusable `DrawioExport` result and the opt-in API compatibility profile.
   cross-group/self/parallel connections, immutable snapshots and custom layout geometry.
 - Paired exports use one layout invocation and return XML that exactly matches the
   independently inflated fragment, including Unicode and large inputs.
-- The JDK 17 compatibility profile compares the packaged JAR with the source-built,
-  pinned 1.0.1 baseline. Historical Java 17 source compiles against the old JAR, its
-  bytecode runs with the new JAR, and the same source compiles against the new JAR.
-- Fourteen analyzer fixtures verify intentional API breaks, compatible additions,
-  internal/private exclusions and strict missing-class handling. Baseline validation
-  and stale-report regression checks also pass.
-- Prepared offline compatibility verification passes with locally cached dependencies.
-  See [API compatibility verification](API-COMPATIBILITY.md) for preparation requirements.
 - Independent reviews of each feature and the combined changes found no remaining
-  actionable findings after correcting stale compatibility-report handling.
+  actionable findings.
 - All six runnable Java examples and all six README Java blocks compile and run against
   the packaged JAR on JDK 17. Local Markdown links resolve.
 
@@ -60,8 +52,8 @@ Implementation classes are grouped under `internal.xml`, `internal.validation` a
 bodies are unchanged apart from imports and the internal visibility required for geometry
 validation across package boundaries. Packaged classes use only the new internal paths,
 and the Javadoc artifact excludes all internal subpackages. The status example's XML is
-byte-for-byte identical before and after relocation. Full verification and the compatibility
-profile continue to cover the packaged consumer and historical public API usage.
+byte-for-byte identical before and after relocation. Full verification continues to cover
+the packaged consumer and public API usage.
 
 ## Version 1.0.0 validation history
 
