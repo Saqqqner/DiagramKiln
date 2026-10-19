@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.saqqqner</groupId>
   <artifactId>diagram-kiln</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <name>DiagramKiln</name>
   <description>Java diagram DSL, ELK layout and draw.io XML export</description>
   <licenses>
