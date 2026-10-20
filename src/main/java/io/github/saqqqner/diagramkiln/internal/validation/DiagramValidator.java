@@ -5,6 +5,9 @@ import io.github.saqqqner.diagramkiln.DiagramEdge;
 import io.github.saqqqner.diagramkiln.DiagramGroup;
 import io.github.saqqqner.diagramkiln.DiagramNode;
 import io.github.saqqqner.diagramkiln.SizedDiagramNode;
+import io.github.saqqqner.diagramkiln.LayoutDiagramNode;
+import io.github.saqqqner.diagramkiln.dto.LayoutNode;
+import io.github.saqqqner.diagramkiln.dto.SizedLayoutNode;
 import io.github.saqqqner.diagramkiln.dto.DefaultDiagram;
 import io.github.saqqqner.diagramkiln.dto.DefaultEdge;
 import io.github.saqqqner.diagramkiln.dto.DefaultGroup;
@@ -59,6 +62,8 @@ public final class DiagramValidator {
       if (node instanceof DiagramGroup group) {
         if (node instanceof SizedDiagramNode)
           throw new IllegalArgumentException("group " + id + " must not declare a leaf size");
+        if (node instanceof LayoutDiagramNode)
+          throw new IllegalArgumentException("group " + id + " must not declare a leaf layout");
         var nested = capture(group.diagram(), active);
         var style = group.groupStyle();
         requireStyle(style, "group " + id);
@@ -68,14 +73,21 @@ public final class DiagramValidator {
         var style = node.style();
         requireStyle(style, "node " + id);
         String label = text(node.label(), "node.label");
+        var layout = node instanceof LayoutDiagramNode configured ? configured.layout() : null;
+        if (node instanceof LayoutDiagramNode && layout == null)
+          throw new IllegalArgumentException("node " + id + " layout must not be null");
         if (node instanceof SizedDiagramNode sized) {
           var size = sized.size();
           if (size == null)
             throw new IllegalArgumentException("node " + id + " size must not be null");
-          nodes.add(new SizedNode(id, label, style, size));
+          nodes.add(layout == null
+              ? new SizedNode(id, label, style, size)
+              : new SizedLayoutNode(id, label, style, size, layout));
         }
         else
-          nodes.add(new DefaultNode(id, label, style));
+          nodes.add(layout == null
+              ? new DefaultNode(id, label, style)
+              : new LayoutNode(id, label, style, layout));
       }
     }
     for (var edge : inputEdges) {

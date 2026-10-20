@@ -6,7 +6,7 @@ Verified locally on October 20, 2026, on Windows with Temurin JDK 17.0.20.1 and
 JDK 21.0.12.1, using Maven Wrapper 3.9.11. The checks cover explicit leaf dimensions,
 the reusable `DrawioExport` result, layout settings and internal package organization.
 
-- The main suite contains 106 tests; the separate packaged Maven consumer has two tests.
+- The main suite contains 115 tests; the separate packaged Maven consumer has three tests.
   `verify` passes on both JDK 17 and 21, including strict Javadoc and formatting.
   Coverage includes mixed shapes and sizes, all layout directions, nested groups,
   cross-group/self/parallel connections, immutable snapshots and custom layout geometry.
@@ -44,6 +44,28 @@ declaration order. Node ordering does not constrain layer assignment or disconne
 component packing, and feedback routing does not force one shared center attachment.
 The updated fixture is [order-status.drawio](../examples/order-status.drawio), with a
 [browser preview](../examples/order-status-preview.png).
+
+### Advanced Layered settings
+
+All nine cycle-breaking strategies, five node-placement strategies and six alignments from
+the pinned ELK 0.11.0 dependency run on a nested cyclic graph with a cross-group connection.
+Regression coverage checks immutable callback capture, optional leaf metadata combined with
+explicit size, FIRST positioning, nested LAST positioning in all four directions, and group
+rejection before reading leaf metadata. Route-sensitive tests cover all four new spacing
+settings, including nested backward edges and parallel self-loops.
+
+The ELK 0.11.0 hierarchical importer also leaves the cycle-breaking group count unset on
+nested graphs. The adapter supplies zero because it does not assign cycle-breaking group
+IDs; together with the existing maximum model-order bound this supports MODEL_ORDER and
+related strategies in nested layouts. This workaround was checked against dependency sources.
+
+The updated status example uses DFS_NODE_ORDER, NETWORK_SIMPLEX, CENTER, thoroughness 50,
+80-pixel edge clearances, 20-pixel port spacing and FIRST on its initial status. Its packaged
+Java 17 example exports successfully and opens in draw.io: the initial status is leftmost,
+the rejected-to-draft transition enters from the left, and approved remains above rejected.
+The [browser preview](../examples/order-status-preview.png) records this check. Interactive
+strategies are selectable but the DSL does not provide initial coordinates for position
+preservation. Existing constructor overloads are exercised by the packaged consumer.
 
 ### Internal package organization
 

@@ -152,6 +152,11 @@ Enable `preserveNodeOrder(true)` to keep declaration order within a layer of eac
 component (top to bottom for RIGHT flow). Layers still follow connections; edge order and
 disconnected component packing remain automatic. Preserving node order may add crossings.
 
+For status diagrams, the DSL also offers typed cycle-breaking and node-placement strategies,
+alignment, search effort, edge/port spacing and per-node FIRST/LAST layer constraints.
+See the [advanced layout example](docs/USER-GUIDE.md#advanced-layered-settings-and-leaf-constraints)
+and the runnable [status diagram](examples/OrderStatusDiagram.java).
+
 Override the size of individual nodes without changing the others:
 
 ```java

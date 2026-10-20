@@ -23,3 +23,5 @@
 - Immutable layout options DSL for direction, leaf size, layer/node spacing and group padding.
 - Editable, uncompressed draw.io XML preserving group ownership and local routes.
 - Java 17 baseline; source/Javadoc artifacts, Maven Wrapper and packaged-consumer checks.
+- Typed Layered strategies, alignment and search effort, with edge and port spacing settings.
+- Per-leaf FIRST/LAST layer constraints in the DSL and optional application DTO interface.

@@ -2,6 +2,7 @@ package io.github.saqqqner.diagramkiln;
 
 import io.github.saqqqner.diagramkiln.config.Direction;
 import io.github.saqqqner.diagramkiln.config.LayoutOptions;
+import io.github.saqqqner.diagramkiln.config.LayeredLayoutOptions;
 import io.github.saqqqner.diagramkiln.internal.validation.DiagramValidator;
 import io.github.saqqqner.diagramkiln.internal.xml.DrawioXmlWriter;
 import io.github.saqqqner.diagramkiln.layout.ElkLayout;
@@ -98,6 +99,11 @@ public final class DrawioExporter {
     private double groupPadding = 20;
     private boolean feedbackEdges = false;
     private boolean preserveNodeOrder = false;
+    private double edgeNodeSpacing = 10;
+    private double edgeSpacing = 10;
+    private double edgeSpacingBetweenLayers = 10;
+    private double portSpacing = 10;
+    private LayeredLayoutOptions layered = LayeredLayoutOptions.defaults();
 
     private Builder() {
     }
@@ -162,6 +168,11 @@ public final class DrawioExporter {
       groupPadding = options.groupPadding();
       feedbackEdges = options.feedbackEdges();
       preserveNodeOrder = options.preserveNodeOrder();
+      edgeNodeSpacing = options.edgeNodeSpacing();
+      edgeSpacing = options.edgeSpacing();
+      edgeSpacingBetweenLayers = options.edgeSpacingBetweenLayers();
+      portSpacing = options.portSpacing();
+      layered = options.layered();
       return this;
     }
 
@@ -175,8 +186,10 @@ public final class DrawioExporter {
     public DrawioExporter build() {
       if (layout == null)
         throw new IllegalArgumentException("layout engine must not be null");
-      return new DrawioExporter(layout, new LayoutOptions(direction, width, height, nodeSpacing,
-          layerSpacing, groupPadding, feedbackEdges, preserveNodeOrder));
+      return new DrawioExporter(layout,
+          new LayoutOptions(direction, width, height, nodeSpacing, layerSpacing, groupPadding,
+              feedbackEdges, preserveNodeOrder, edgeNodeSpacing, edgeSpacing,
+              edgeSpacingBetweenLayers, portSpacing, layered));
     }
   }
 }

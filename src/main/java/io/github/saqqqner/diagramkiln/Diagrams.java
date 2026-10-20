@@ -6,6 +6,9 @@ import io.github.saqqqner.diagramkiln.dto.DefaultGroup;
 import io.github.saqqqner.diagramkiln.dto.DefaultNode;
 import io.github.saqqqner.diagramkiln.dto.NodeSize;
 import io.github.saqqqner.diagramkiln.dto.SizedNode;
+import io.github.saqqqner.diagramkiln.dto.LayoutNode;
+import io.github.saqqqner.diagramkiln.dto.SizedLayoutNode;
+import io.github.saqqqner.diagramkiln.config.NodeLayout;
 import io.github.saqqqner.diagramkiln.internal.validation.DiagramValidator;
 import io.github.saqqqner.diagramkiln.style.EdgeStyle;
 import io.github.saqqqner.diagramkiln.style.GroupStyle;
@@ -114,6 +117,47 @@ public final class Diagrams {
      */
     public Builder node(String id, String label, NodeStyle style, double width, double height) {
       nodes.add(new SizedNode(id, label, style, new NodeSize(width, height)));
+      return this;
+    }
+
+    /**
+     * Adds a styled leaf with immutable per-node layout metadata.
+     *
+     * @param id
+     *          globally unique identifier
+     * @param label
+     *          plain text label
+     * @param style
+     *          non-null appearance
+     * @param layout
+     *          non-null immutable layout metadata
+     * @return this builder
+     */
+    public Builder node(String id, String label, NodeStyle style, NodeLayout layout) {
+      nodes.add(new LayoutNode(id, label, style, layout));
+      return this;
+    }
+
+    /**
+     * Combines explicit leaf dimensions with immutable layout metadata.
+     *
+     * @param id
+     *          globally unique identifier
+     * @param label
+     *          plain text label
+     * @param style
+     *          non-null appearance
+     * @param width
+     *          finite positive pixel width
+     * @param height
+     *          finite positive pixel height
+     * @param layout
+     *          non-null immutable layout metadata
+     * @return this builder
+     */
+    public Builder node(String id, String label, NodeStyle style, double width, double height,
+        NodeLayout layout) {
+      nodes.add(new SizedLayoutNode(id, label, style, new NodeSize(width, height), layout));
       return this;
     }
 

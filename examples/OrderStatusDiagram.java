@@ -3,6 +3,11 @@ import io.github.saqqqner.diagramkiln.Diagrams;
 import io.github.saqqqner.diagramkiln.DrawioExporter;
 import io.github.saqqqner.diagramkiln.config.Direction;
 import io.github.saqqqner.diagramkiln.config.LayoutOptions;
+import io.github.saqqqner.diagramkiln.config.CycleBreaking;
+import io.github.saqqqner.diagramkiln.config.NodePlacement;
+import io.github.saqqqner.diagramkiln.config.Alignment;
+import io.github.saqqqner.diagramkiln.config.NodeLayout;
+import io.github.saqqqner.diagramkiln.config.LayerConstraint;
 import io.github.saqqqner.diagramkiln.style.Arrow;
 import io.github.saqqqner.diagramkiln.style.EdgeStyle;
 import io.github.saqqqner.diagramkiln.style.JumpStyle;
@@ -21,10 +26,12 @@ public final class OrderStatusDiagram {
     var transition = EdgeStyle.builder().strokeColor("#34495E").strokeWidth(2)
         .endArrow(Arrow.CLASSIC).endSize(2).rounded(true).jumpStyle(JumpStyle.GAP).jumpSize(6)
         .build();
-    return Diagrams.diagram("Статусы заявки").node("draft", "Черновик", status)
-        .node("review", "На согласовании", status).node("approved", "Согласована", status)
-        .node("rejected", "Отклонена", status).node("completed", "Завершена", status)
-        .node("unused", "Не используется", isolated)
+    var first = NodeLayout.builder().layerConstraint(LayerConstraint.FIRST).build();
+    return Diagrams.diagram("Статусы заявки").node("created", "Создана", status, first)
+        .node("draft", "Черновик", status).node("review", "На согласовании", status)
+        .node("approved", "Согласована", status).node("rejected", "Отклонена", status)
+        .node("completed", "Завершена", status).node("unused", "Не используется", isolated)
+        .edge("created", "draft", "Создать", transition)
         .edge("draft", "review", "Отправить", transition)
         .edge("review", "approved", "Согласовать", transition)
         .edge("review", "rejected", "Отклонить", transition)
@@ -33,8 +40,13 @@ public final class OrderStatusDiagram {
   }
 
   public static void main(String[] args) throws Exception {
-    var options = LayoutOptions.builder().direction(Direction.RIGHT).nodeSize(200, 80)
-        .nodeSpacing(50).layerSpacing(100).feedbackEdges(true).preserveNodeOrder(true).build();
+    var options = LayoutOptions.builder().direction(Direction.RIGHT).nodeSize(180, 60)
+        .nodeSpacing(80).layerSpacing(75).edgeNodeSpacing(80).edgeSpacing(80)
+        .edgeSpacingBetweenLayers(80).portSpacing(20).feedbackEdges(true).preserveNodeOrder(true)
+        .layered(l -> l.cycleBreaking(CycleBreaking.DFS_NODE_ORDER)
+            .nodePlacement(NodePlacement.NETWORK_SIMPLEX).alignment(Alignment.CENTER)
+            .thoroughness(50))
+        .build();
     var exporter = DrawioExporter.builder().layoutOptions(options).build();
     Path output = Path.of(args.length == 0 ? "examples/order-status.drawio" : args[0]);
     var result = exporter.export(new OrderStatusDiagram().describe());

@@ -1,5 +1,7 @@
 package io.github.saqqqner.diagramkiln.config;
 
+import java.util.function.Consumer;
+
 /**
  * Validated layout configuration; container bounds are calculated from contents.
  *
@@ -19,10 +21,21 @@ package io.github.saqqqner.diagramkiln.config;
  *          whether ELK routes backward edges around nodes, preserving flow-side attachments
  * @param preserveNodeOrder
  *          whether same-layer nodes retain declaration order within each connected component
+ * @param edgeNodeSpacing
+ *          finite nonnegative minimum edge-to-node distance in pixels
+ * @param edgeSpacing
+ *          finite nonnegative minimum edge-to-edge distance in pixels
+ * @param edgeSpacingBetweenLayers
+ *          finite nonnegative edge distance between layers in pixels
+ * @param portSpacing
+ *          finite nonnegative distance between ports in pixels
+ * @param layered
+ *          non-null immutable Layered-specific settings
  */
 public record LayoutOptions(Direction direction, double nodeWidth, double nodeHeight,
     double nodeSpacing, double layerSpacing, double groupPadding, boolean feedbackEdges,
-    boolean preserveNodeOrder) {
+    boolean preserveNodeOrder, double edgeNodeSpacing, double edgeSpacing,
+    double edgeSpacingBetweenLayers, double portSpacing, LayeredLayoutOptions layered) {
   /**
    * Creates settings with legacy spacing (40/80) and group padding (20).
    *
@@ -83,6 +96,32 @@ public record LayoutOptions(Direction direction, double nodeWidth, double nodeHe
   }
 
   /**
+   * Preserves the legacy constructor and ELK 0.11 routing and strategy defaults.
+   *
+   * @param direction
+   *          non-null flow direction
+   * @param nodeWidth
+   *          positive leaf width
+   * @param nodeHeight
+   *          positive leaf height
+   * @param nodeSpacing
+   *          nonnegative within-layer spacing
+   * @param layerSpacing
+   *          nonnegative between-layer spacing
+   * @param groupPadding
+   *          nonnegative group padding
+   * @param feedbackEdges
+   *          whether backward edges retain flow-side attachments
+   * @param preserveNodeOrder
+   *          whether same-layer nodes retain model order
+   */
+  public LayoutOptions(Direction direction, double nodeWidth, double nodeHeight, double nodeSpacing,
+      double layerSpacing, double groupPadding, boolean feedbackEdges, boolean preserveNodeOrder) {
+    this(direction, nodeWidth, nodeHeight, nodeSpacing, layerSpacing, groupPadding, feedbackEdges,
+        preserveNodeOrder, 10, 10, 10, 10, LayeredLayoutOptions.defaults());
+  }
+
+  /**
    * Validates direction, dimensions and spacing.
    *
    * @param direction
@@ -101,6 +140,16 @@ public record LayoutOptions(Direction direction, double nodeWidth, double nodeHe
    *          whether backward edges retain flow-side attachments and route around nodes
    * @param preserveNodeOrder
    *          whether same-layer nodes retain declaration order within each connected component
+   * @param edgeNodeSpacing
+   *          finite nonnegative edge-to-node spacing
+   * @param edgeSpacing
+   *          finite nonnegative edge-to-edge spacing
+   * @param edgeSpacingBetweenLayers
+   *          finite nonnegative between-layer edge spacing
+   * @param portSpacing
+   *          finite nonnegative port spacing
+   * @param layered
+   *          non-null immutable Layered-specific settings
    */
   public LayoutOptions {
     if (direction == null)
@@ -112,6 +161,12 @@ public record LayoutOptions(Direction direction, double nodeWidth, double nodeHe
     nonnegative(nodeSpacing, "nodeSpacing");
     nonnegative(layerSpacing, "layerSpacing");
     nonnegative(groupPadding, "groupPadding");
+    nonnegative(edgeNodeSpacing, "edgeNodeSpacing");
+    nonnegative(edgeSpacing, "edgeSpacing");
+    nonnegative(edgeSpacingBetweenLayers, "edgeSpacingBetweenLayers");
+    nonnegative(portSpacing, "portSpacing");
+    if (layered == null)
+      throw new IllegalArgumentException("layered settings must not be null");
   }
 
   private void nonnegative(double value, String name) {
@@ -138,6 +193,11 @@ public record LayoutOptions(Direction direction, double nodeWidth, double nodeHe
     private double groupPadding = 20;
     private boolean feedbackEdges = false;
     private boolean preserveNodeOrder = false;
+    private double edgeNodeSpacing = 10;
+    private double edgeSpacing = 10;
+    private double edgeSpacingBetweenLayers = 10;
+    private double portSpacing = 10;
+    private LayeredLayoutOptions layered = LayeredLayoutOptions.defaults();
 
     private Builder() {
     }
@@ -237,6 +297,83 @@ public record LayoutOptions(Direction direction, double nodeWidth, double nodeHe
     }
 
     /**
+     * Sets edge-to-node clearance at every nesting level. ELK may require larger gaps.
+     *
+     * @param value
+     *          finite nonnegative pixel distance
+     * @return this builder
+     */
+    public Builder edgeNodeSpacing(double value) {
+      edgeNodeSpacing = value;
+      return this;
+    }
+
+    /**
+     * Sets edge-to-edge spacing within a layer.
+     *
+     * @param value
+     *          finite nonnegative pixel distance
+     * @return this builder
+     */
+    public Builder edgeSpacing(double value) {
+      edgeSpacing = value;
+      return this;
+    }
+
+    /**
+     * Sets edge-to-edge spacing between layers.
+     *
+     * @param value
+     *          finite nonnegative pixel distance
+     * @return this builder
+     */
+    public Builder edgeSpacingBetweenLayers(double value) {
+      edgeSpacingBetweenLayers = value;
+      return this;
+    }
+
+    /**
+     * Sets minimum port spacing. Fixed node bounds may limit feasible port distribution.
+     *
+     * @param value
+     *          finite nonnegative pixel distance
+     * @return this builder
+     */
+    public Builder portSpacing(double value) {
+      portSpacing = value;
+      return this;
+    }
+
+    /**
+     * Captures a fresh Layered-settings callback immediately, replacing previous settings.
+     *
+     * @param settings
+     *          non-null callback; may retain the builder without affecting captured settings
+     * @return this builder
+     */
+    public Builder layered(Consumer<LayeredLayoutOptions.Builder> settings) {
+      if (settings == null)
+        throw new IllegalArgumentException("layered callback must not be null");
+      var builder = LayeredLayoutOptions.builder();
+      settings.accept(builder);
+      return layeredOptions(builder.build());
+    }
+
+    /**
+     * Reuses immutable Layered settings, replacing previous settings.
+     *
+     * @param settings
+     *          non-null immutable settings
+     * @return this builder
+     */
+    public Builder layeredOptions(LayeredLayoutOptions settings) {
+      if (settings == null)
+        throw new IllegalArgumentException("layered settings must not be null");
+      layered = settings;
+      return this;
+    }
+
+    /**
      * Validates and captures layout settings.
      *
      * @return immutable settings
@@ -245,7 +382,8 @@ public record LayoutOptions(Direction direction, double nodeWidth, double nodeHe
      */
     public LayoutOptions build() {
       return new LayoutOptions(direction, width, height, nodeSpacing, layerSpacing, groupPadding,
-          feedbackEdges, preserveNodeOrder);
+          feedbackEdges, preserveNodeOrder, edgeNodeSpacing, edgeSpacing, edgeSpacingBetweenLayers,
+          portSpacing, layered);
     }
   }
 }

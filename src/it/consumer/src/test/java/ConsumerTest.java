@@ -17,6 +17,11 @@ import io.github.saqqqner.diagramkiln.SizedDiagramNode;
 import io.github.saqqqner.diagramkiln.dto.NodeSize;
 import io.github.saqqqner.diagramkiln.config.Direction;
 import io.github.saqqqner.diagramkiln.config.LayoutOptions;
+import io.github.saqqqner.diagramkiln.config.Alignment;
+import io.github.saqqqner.diagramkiln.config.CycleBreaking;
+import io.github.saqqqner.diagramkiln.config.NodePlacement;
+import io.github.saqqqner.diagramkiln.config.NodeLayout;
+import io.github.saqqqner.diagramkiln.config.LayerConstraint;
 import io.github.saqqqner.diagramkiln.style.EdgeStyle;
 import io.github.saqqqner.diagramkiln.style.JumpStyle;
 import io.github.saqqqner.diagramkiln.style.NodeShape;
@@ -26,6 +31,26 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ConsumerTest {
+  @Test
+  void consumesAdvancedLayoutAndLegacyConstructors() {
+    var first = NodeLayout.builder().layerConstraint(LayerConstraint.FIRST).build();
+    var data = Diagrams.diagram("Advanced").node("a", "First", NodeStyle.defaults(), 180, 60, first)
+        .node("b", "Last").edge("a", "b", "").build();
+    var options = LayoutOptions.builder().edgeNodeSpacing(80).edgeSpacing(80)
+        .edgeSpacingBetweenLayers(80).portSpacing(20)
+        .layered(l -> l.cycleBreaking(CycleBreaking.DFS_NODE_ORDER)
+            .nodePlacement(NodePlacement.NETWORK_SIMPLEX).alignment(Alignment.CENTER)
+            .thoroughness(50))
+        .build();
+    assertTrue(
+        DrawioExporter.builder().layoutOptions(options).build().toXml(data).contains("First"));
+    assertEquals(10, new LayoutOptions(Direction.RIGHT, 160, 60).edgeSpacing());
+    assertEquals(10, new LayoutOptions(Direction.RIGHT, 160, 60, 40, 80, 20).edgeSpacing());
+    assertEquals(10, new LayoutOptions(Direction.RIGHT, 160, 60, 40, 80, 20, true).edgeSpacing());
+    assertEquals(10,
+        new LayoutOptions(Direction.RIGHT, 160, 60, 40, 80, 20, true, true).edgeSpacing());
+  }
+
   record SizedStatus(String id, String label, NodeSize size) implements SizedDiagramNode {
   }
 

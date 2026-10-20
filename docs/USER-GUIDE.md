@@ -184,6 +184,65 @@ subsequent direction() or nodeSize() call overrides only the respective fields.
 Style semantics were checked against [draw.io](https://www.drawio.com/docs/manual/styles/connector-styles/)
 and [mxGraph](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxConstants-js.html).
 
+## Advanced Layered settings and leaf constraints
+
+```java
+import io.github.saqqqner.diagramkiln.config.Alignment;
+import io.github.saqqqner.diagramkiln.config.CycleBreaking;
+import io.github.saqqqner.diagramkiln.config.LayerConstraint;
+import io.github.saqqqner.diagramkiln.config.NodeLayout;
+import io.github.saqqqner.diagramkiln.config.NodePlacement;
+
+var layout = LayoutOptions.builder().direction(Direction.RIGHT).nodeSize(180, 60)
+    .nodeSpacing(80).layerSpacing(75)
+    .edgeNodeSpacing(80).edgeSpacing(80).edgeSpacingBetweenLayers(80).portSpacing(20)
+    .feedbackEdges(true).preserveNodeOrder(true)
+    .layered(l -> l.cycleBreaking(CycleBreaking.DFS_NODE_ORDER)
+        .nodePlacement(NodePlacement.NETWORK_SIMPLEX)
+        .alignment(Alignment.CENTER).thoroughness(50))
+    .build();
+
+var first = NodeLayout.builder().layerConstraint(LayerConstraint.FIRST).build();
+var diagram = Diagrams.diagram("Statuses")
+    .node("created", "Created", NodeStyle.defaults(), first)
+    .node("draft", "Draft")
+    .edge("created", "draft", "")
+    .build();
+String xml = DrawioExporter.builder().layoutOptions(layout).build().toXml(diagram);
+```
+
+The four new distances are finite nonnegative pixels and default to 10, matching ELK 0.11.0.
+`edgeNodeSpacing` and `edgeSpacing` set within-layer edge clearances;
+`edgeSpacingBetweenLayers` sets edge-to-edge clearance between layers. These are separate
+ELK settings, not universal minimum distances for every route segment. `portSpacing` affects
+port distribution; a fixed node size can limit the feasible spacing.
+
+Layered defaults remain `GREEDY`, `BRANDES_KOEPF`, `AUTOMATIC` and thoroughness `7`.
+All nine ELK 0.11.0 cycle breakers, five node placement strategies and six alignments are
+available as library enums. The `INTERACTIVE` strategies depend on existing coordinates;
+this DSL does not supply initial coordinates and therefore does not offer interactive
+layout preservation. Alignment follows ELK's alignment option and is not a port anchor.
+Higher thoroughness increases search effort and may increase execution time.
+
+The `layered(...)` callback receives a fresh builder and is captured immediately.
+Each call replaces the previous Layered settings; `layeredOptions(...)` accepts an already
+built immutable value. Custom layout engines receive all settings and decide how to use them.
+
+`NodeLayout` supports `NONE` (default), `FIRST` and `LAST`, relative to the leaf's
+containing graph and flow direction. ELK's internal separate-layer variants are not exposed.
+Use constraints with model-order cycle breakers, such as `DFS_NODE_ORDER`; incompatible
+constraints/topology can fail during layout. A source constrained to FIRST is not automatically
+detected: application code selects the initial statuses. When classifying sources, ignore
+self-loops and require at least one outgoing non-self transition to avoid marking isolated
+statuses as initial.
+
+For application DTOs, implement `LayoutDiagramNode` and return non-null immutable
+`NodeLayout` from `layout()`. It can be combined with `SizedDiagramNode`; capture reads
+each property once and preserves both size and layout metadata. Leaf settings on
+`DiagramGroup` implementations are rejected. Existing `DiagramNode` implementations and
+node overloads remain unchanged. Explicitly sized DSL leaves accept settings as the last
+argument: `node(id, label, style, width, height, nodeLayout)`.
+
 ## Individual node sizes
 
 Use `.node(id, label, width, height)` or `.node(id, label, style, width, height)` to set

@@ -18,6 +18,7 @@ import org.eclipse.elk.graph.util.ElkGraphUtil;
 import io.github.saqqqner.diagramkiln.DiagramData;
 import io.github.saqqqner.diagramkiln.DiagramGroup;
 import io.github.saqqqner.diagramkiln.SizedDiagramNode;
+import io.github.saqqqner.diagramkiln.LayoutDiagramNode;
 import io.github.saqqqner.diagramkiln.config.LayoutOptions;
 import io.github.saqqqner.diagramkiln.dto.LayoutResult;
 import io.github.saqqqner.diagramkiln.dto.Point;
@@ -75,14 +76,22 @@ public final class ElkLayout implements LayoutEngine {
       }
       else
         elk.setDimensions(options.nodeWidth(), options.nodeHeight());
+      if (node instanceof LayoutDiagramNode configured)
+        elk.setProperty(LayeredOptions.LAYERING_LAYER_CONSTRAINT,
+            org.eclipse.elk.alg.layered.options.LayerConstraint
+                .valueOf(configured.layout().layerConstraint().name()));
       elkNodes.put(node.id(), elk);
     }
-    if (options.preserveNodeOrder()) {
-      // ELK 0.11 initializes this bound only on the root during hierarchical import.
-      // Nested model-order comparators also require it; imported node indices are global.
+    if (options.preserveNodeOrder() || options.layered()
+        .cycleBreaking() != io.github.saqqqner.diagramkiln.config.CycleBreaking.GREEDY) {
+      // ELK 0.11 initializes these properties only on the root during hierarchical import.
+      // Nested comparators need the global index bound and the number of explicit CB groups.
+      // This adapter does not assign cycle-breaking group IDs, so that count is zero.
       for (var node : elkNodes.values()) {
-        if (!node.getChildren().isEmpty())
+        if (!node.getChildren().isEmpty()) {
           node.setProperty(InternalProperties.MAX_MODEL_ORDER_NODES, elkNodes.size());
+          node.setProperty(InternalProperties.CB_NUM_MODEL_ORDER_GROUPS, 0);
+        }
       }
     }
     var elkEdges = new ArrayList<ElkEdge>();
@@ -136,6 +145,20 @@ public final class ElkLayout implements LayoutEngine {
     }
     node.setProperty(CoreOptions.SPACING_NODE_NODE, options.nodeSpacing());
     node.setProperty(LayeredOptions.SPACING_NODE_NODE_BETWEEN_LAYERS, options.layerSpacing());
+    node.setProperty(CoreOptions.SPACING_EDGE_NODE, options.edgeNodeSpacing());
+    node.setProperty(CoreOptions.SPACING_EDGE_EDGE, options.edgeSpacing());
+    node.setProperty(LayeredOptions.SPACING_EDGE_EDGE_BETWEEN_LAYERS,
+        options.edgeSpacingBetweenLayers());
+    node.setProperty(CoreOptions.SPACING_PORT_PORT, options.portSpacing());
+    node.setProperty(LayeredOptions.CYCLE_BREAKING_STRATEGY,
+        org.eclipse.elk.alg.layered.options.CycleBreakingStrategy
+            .valueOf(options.layered().cycleBreaking().name()));
+    node.setProperty(LayeredOptions.NODE_PLACEMENT_STRATEGY,
+        org.eclipse.elk.alg.layered.options.NodePlacementStrategy
+            .valueOf(options.layered().nodePlacement().name()));
+    node.setProperty(CoreOptions.ALIGNMENT,
+        org.eclipse.elk.core.options.Alignment.valueOf(options.layered().alignment().name()));
+    node.setProperty(LayeredOptions.THOROUGHNESS, options.layered().thoroughness());
   }
 
   private Point origin(ElkNode node, ElkNode root) {
