@@ -2,7 +2,8 @@
 
 DiagramKiln is a Java 17+ library that converts a Java diagram DSL or application DTOs
 into editable draw.io XML, using ELK for layout. Maven coordinates are
-`io.github.saqqqner:diagram-kiln`; the base package is `io.github.saqqqner.diagramkiln`.
+`io.github.saqqqner:diagram-kiln`; the base package and automatic module name remain
+`io.github.saqqqner.diagramkiln`. Historical 1.0.x releases used Maven groupId `io.github.saqqqner`.
 
 ## Repository map
 

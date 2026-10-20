@@ -331,12 +331,13 @@ engines own their thread-safety contract.
 
 ## Run the repository examples
 
-Run these commands from the project root (Windows):
+Run these commands from the 1.1.0 release checkout (Windows); on dev, use the
+matching snapshot JAR filename:
 
 ```powershell
 ./mvnw.cmd package dependency:copy-dependencies "-DincludeScope=runtime"
-javac --release 17 -encoding UTF-8 -cp "target/diagram-kiln-1.1.0-SNAPSHOT.jar;target/dependency/*" -d target/examples examples/NestedCraftingDiagram.java
-java -cp "target/examples;target/diagram-kiln-1.1.0-SNAPSHOT.jar;target/dependency/*" NestedCraftingDiagram
+javac --release 17 -encoding UTF-8 -cp "target/diagram-kiln-1.1.0.jar;target/dependency/*" -d target/examples examples/NestedCraftingDiagram.java
+java -cp "target/examples;target/diagram-kiln-1.1.0.jar;target/dependency/*" NestedCraftingDiagram
 ```
 
 On Linux/macOS, use `bash ./mvnw` and replace the classpath separator `;` with `:`.

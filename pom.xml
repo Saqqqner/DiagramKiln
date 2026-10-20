@@ -4,9 +4,23 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.saqqqner</groupId>
   <artifactId>diagram-kiln</artifactId>
-  <version>1.1.0-SNAPSHOT</version>
+  <version>1.1.0</version>
   <name>DiagramKiln</name>
   <description>Java diagram DSL, ELK layout and draw.io XML export</description>
+  <url>https://github.com/Saqqqner/DiagramKiln</url>
+  <developers>
+    <developer>
+      <id>Saqqqner</id>
+      <name>Saqqqner</name>
+      <url>https://github.com/Saqqqner</url>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:https://github.com/Saqqqner/DiagramKiln.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/Saqqqner/DiagramKiln.git</developerConnection>
+    <url>https://github.com/Saqqqner/DiagramKiln</url>
+    <tag>1.1.0</tag>
+  </scm>
   <licenses>
     <license>
       <name>MIT</name>
@@ -35,7 +49,11 @@
     <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
     <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
     <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
-    <project.build.outputTimestamp>2026-10-19T00:00:00Z</project.build.outputTimestamp>
+    <central-publishing-maven-plugin.version>0.12.0</central-publishing-maven-plugin.version>
+    <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
+    <!-- Release rehearsal is local-only unless upload is explicitly enabled. -->
+    <central.skipUpload>true</central.skipUpload>
+    <project.build.outputTimestamp>2026-10-20T00:00:00Z</project.build.outputTimestamp>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -228,4 +246,60 @@
       </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>central-release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <version>${maven-enforcer-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>require-central-release-version</id>
+                <phase>validate</phase>
+                <goals><goal>enforce</goal></goals>
+                <configuration>
+                  <rules>
+                    <requireReleaseVersion>
+                      <message>Central releases require an agreed non-SNAPSHOT version in a release checkout.</message>
+                    </requireReleaseVersion>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>${maven-gpg-plugin.version}</version>
+            <configuration>
+              <signer>bc</signer>
+              <bestPractices>true</bestPractices>
+            </configuration>
+            <executions>
+              <execution>
+                <id>sign-central-artifacts</id>
+                <phase>verify</phase>
+                <goals><goal>sign</goal></goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <version>${central-publishing-maven-plugin.version}</version>
+            <extensions>true</extensions>
+            <configuration>
+              <publishingServerId>central</publishingServerId>
+              <autoPublish>false</autoPublish>
+              <skipUpload>${central.skipUpload}</skipUpload>
+              <waitUntil>validated</waitUntil>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

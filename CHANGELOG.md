@@ -1,7 +1,10 @@
 # Changelog
 
-## Unreleased — 1.1.0-SNAPSHOT
+## 1.1.0 — 2026-10-20
 
+- Maven groupId changed to io.github.saqqqner; Java packages and automatic module name remain
+  io.github.saqqqner.diagramkiln. Existing 1.0.x release coordinates remain historical.
+- Opt-in Central Portal publishing profile with signing and local-only bundle generation by default.
 - Internal implementation organized into XML, validation and geometry packages.
 - Optional feedback-edge routing in the layout DSL for backward transitions.
 - Optional preservation of declared node order within layers, including nested groups.

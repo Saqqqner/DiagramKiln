@@ -3,6 +3,7 @@ import java.io.ByteArrayInputStream;
 import java.net.URLDecoder;
 import java.util.Base64;
 import java.util.List;
+import java.util.Properties;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 import java.nio.file.Path;
@@ -86,6 +87,15 @@ class ConsumerTest {
     try (var jar = new JarFile(location.toFile())) {
       assertEquals("io.github.saqqqner.diagramkiln",
           jar.getManifest().getMainAttributes().getValue("Automatic-Module-Name"));
+      var coordinates = new Properties();
+      var pomProperties = jar
+          .getJarEntry("META-INF/maven/io.github.saqqqner/diagram-kiln/pom.properties");
+      assertNotNull(pomProperties);
+      try (var input = jar.getInputStream(pomProperties)) {
+        coordinates.load(input);
+      }
+      assertEquals("io.github.saqqqner", coordinates.getProperty("groupId"));
+      assertEquals("diagram-kiln", coordinates.getProperty("artifactId"));
       var license = jar.getJarEntry("META-INF/LICENSE");
       assertNotNull(license);
       try (var input = jar.getInputStream(license)) {

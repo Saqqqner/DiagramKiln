@@ -1,6 +1,23 @@
 # Validation report
 
-## Development version 1.1.0-SNAPSHOT
+## Version 1.1.0
+
+### Release preparation
+
+The release uses `io.github.saqqqner:diagram-kiln:1.1.0`; Java packages and automatic module
+name remain `io.github.saqqqner.diagramkiln`. A clean local JDK 21 verification passed 122 main tests,
+three packaged-consumer tests, strict Javadoc and formatting of 70 Java files. Both complete
+README examples compiled with `--release 17` and ran against the release JAR; public signatures
+of all 46 non-internal classes match the preceding development build. Independent diff review
+found no actionable findings.
+
+Publication preparation uses a profile with `skipUpload=true` and manual final publication.
+No Central upload or signing-key validation was performed. Namespace verification and signing
+remain prerequisites. Local privacy checks covered published branch/tag history, tracked and
+proposed files, the release JAR contents and all six example previews. Historical Git identities
+and root copyright attribution were rewritten with the owner's authorization. Old backups,
+reflogs, private app refs and external clones/caches are outside the published-ref cleanup.
+
 
 ### Approved cleanup verification
 

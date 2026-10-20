@@ -14,15 +14,18 @@ Requires **Java 17+**.
 
 ## Install
 
-The latest release is **1.0.1** (tag `1.0.1`). This branch develops **1.1.0-SNAPSHOT**.
-Artifacts are not yet published to a public Maven repository.
+The latest release is **1.1.0** (tag `1.1.0`), using Maven groupId `io.github.saqqqner`.
+The `main` branch contains the release; `dev` develops `1.2.0-SNAPSHOT`.
+Artifacts are not yet published to a public Maven repository. An opt-in Central Portal
+profile is prepared with upload disabled by default; see [publication setup](docs/PUBLISHING.md#central-portal-prerequisites).
 
 Use a clean checkout and choose the version you want before building:
 
-| Version | Select source | Application dependency version |
+| Version | Select source | Application dependency coordinates |
 | --- | --- | --- |
-| Stable release | `git switch --detach 1.0.1` | `1.0.1` |
-| Development APIs documented on this branch | `git switch dev` | `1.1.0-SNAPSHOT` |
+| Stable release | `git switch --detach 1.1.0` | `io.github.saqqqner:diagram-kiln:1.1.0` |
+| Development | `git switch dev` | `io.github.saqqqner:diagram-kiln:1.2.0-SNAPSHOT` |
+| Historical release | `git switch --detach 1.0.1` | `io.github.saqqqner:diagram-kiln:1.0.1` |
 
 Build and install the selected version from the project root:
 
@@ -36,22 +39,25 @@ On Linux/macOS:
 bash ./mvnw clean install
 ```
 
-Then add this dependency to your application's `pom.xml`:
+For the stable release build, add this dependency to your application's `pom.xml`:
 
 ```xml
 <dependency>
   <groupId>io.github.saqqqner</groupId>
   <artifactId>diagram-kiln</artifactId>
-  <version>1.0.1</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 
-For a `dev` build, replace the dependency version with `1.1.0-SNAPSHOT`.
-The dependency version must match the version you installed locally.
+For `dev`, use version `1.2.0-SNAPSHOT`. For the historical tag `1.0.1`, use groupId
+`io.github.saqqqner` and version `1.0.1` instead.
+Both groupId and version must match the source you built and installed locally. The new
+namespace does not rename Java imports or the automatic module: both remain
+`io.github.saqqqner.diagramkiln`. Confirm namespace verification in Central Portal before publishing.
 Maven brings in ELK and the other runtime dependencies automatically.
 
-The first diagram below works with both versions. Later sections describe the development
-API, including features that are unavailable in 1.0.1; select `dev` to use those examples.
+The first diagram works with both 1.0.1 and 1.1.0. Later sections describe the 1.1.0 API,
+including features unavailable in 1.0.1.
 
 ## Create your first diagram
 

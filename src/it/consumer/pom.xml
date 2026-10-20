@@ -13,7 +13,7 @@
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>io.github.saqqqner</groupId>
+			<groupId>@project.groupId@</groupId>
 			<artifactId>diagram-kiln</artifactId>
 			<version>@project.version@</version>
 		</dependency>
