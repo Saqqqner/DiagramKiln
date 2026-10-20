@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased — 1.2.0-SNAPSHOT
+
 ## 1.1.0 — 2026-10-20
 
 - Maven groupId changed to io.github.saqqqner; Java packages and automatic module name remain
