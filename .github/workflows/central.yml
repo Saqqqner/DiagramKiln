@@ -1,0 +1,217 @@
+name: Publish stable release to Central
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Existing stable GitHub release tag'
+        type: string
+        required: true
+        default: '1.1.0'
+      mode:
+        description: 'bundle: verify without upload; publish: automatic Central publication'
+        type: choice
+        default: bundle
+        options: [bundle, publish]
+      deployment_id:
+        description: 'Resume an existing deployment from this workflow; do not upload again'
+        type: string
+        default: ''
+      confirm_no_pending_deployment:
+        description: 'For a new manual upload: I checked Portal and no pending deployment exists'
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      release_tag:
+        type: string
+        required: true
+      mode:
+        type: string
+        default: publish
+    secrets:
+      CENTRAL_TOKEN_USERNAME:
+        required: false
+      CENTRAL_TOKEN_PASSWORD:
+        required: false
+      MAVEN_GPG_KEY:
+        required: false
+      MAVEN_GPG_PASSPHRASE:
+        required: false
+      MAVEN_GPG_KEY_FINGERPRINT:
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: central-${{ github.event.release.tag_name || inputs.release_tag }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: >-
+      github.repository == 'Saqqqner/DiagramKiln' &&
+      github.event_name != 'pull_request' && github.event_name != 'pull_request_target' &&
+      (github.event_name != 'workflow_dispatch' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)) &&
+      (github.event_name != 'release' || (!github.event.release.prerelease && !github.event.release.draft)) &&
+      (inputs.mode == 'bundle' || vars.CENTRAL_PUBLISH_ENABLED == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      commit: ${{ steps.release.outputs.commit }}
+      tag: ${{ steps.release.outputs.tag }}
+      mode: ${{ steps.release.outputs.mode }}
+      already_published: ${{ steps.release.outputs.already_published }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate stable release, exact commit and unused Central version
+        id: release
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+          RELEASE_MODE: ${{ inputs.mode || 'publish' }}
+          EVENT_NAME: ${{ github.event_name }}
+          CONFIRM_RETRY: ${{ inputs.confirm_no_pending_deployment }}
+          DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if [[ -n "$DEPLOYMENT_ID" && "$RELEASE_MODE" != publish ]]; then
+            echo 'An existing deployment can only be resumed in publish mode.'
+            exit 1
+          fi
+          python3 .github/scripts/validate-central-release.py
+          python3 .github/scripts/central_release.py check --version "$RELEASE_TAG"
+          if [[ "$EVENT_NAME" == workflow_dispatch && "$RELEASE_MODE" == publish && -z "$DEPLOYMENT_ID" && "$CONFIRM_RETRY" != true ]]; then
+            echo 'Check Central Portal before starting a new manual upload.'
+            exit 1
+          fi
+          echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          echo "mode=$RELEASE_MODE" >> "$GITHUB_OUTPUT"
+
+  verify:
+    needs: prepare
+    if: needs.prepare.outputs.already_published != 'true' && !inputs.deployment_id
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ['17', '21']
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prepare.outputs.commit }}
+          persist-credentials: false
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+      - name: Tests, strict Javadoc, formatting and packaged consumer
+        run: bash ./mvnw -B -ntp clean verify
+
+  publish:
+    needs: [prepare, verify]
+    if: needs.prepare.outputs.already_published != 'true' && !inputs.deployment_id
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      # Keep trusted helper code outside the checkout before selecting historical sources.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - name: Preserve trusted workflow helper
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/central-tools"
+          cp .github/scripts/central_release.py "$RUNNER_TEMP/central-tools/central_release.py"
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prepare.outputs.commit }}
+          persist-credentials: false
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+          server-id: central
+          server-username-env-var: CENTRAL_TOKEN_USERNAME
+          server-password-env-var: CENTRAL_TOKEN_PASSWORD
+          settings-path: ${{ runner.temp }}/central-settings
+      - name: Build, sign and cryptographically verify the no-upload bundle
+        env:
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+          MAVEN_GPG_KEY: ${{ secrets.MAVEN_GPG_KEY }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+          MAVEN_GPG_KEY_FINGERPRINT: ${{ secrets.MAVEN_GPG_KEY_FINGERPRINT }}
+        shell: bash
+        run: |
+          test -n "$MAVEN_GPG_KEY" || { echo 'Missing MAVEN_GPG_KEY'; exit 1; }
+          test -n "$MAVEN_GPG_PASSPHRASE" || { echo 'Missing MAVEN_GPG_PASSPHRASE'; exit 1; }
+          bash ./mvnw -B -ntp -s "$RUNNER_TEMP/central-settings/settings.xml" -Pcentral-release -Dcentral.skipUpload=true -Dmaven.install.skip=true clean deploy
+          python3 "$RUNNER_TEMP/central-tools/central_release.py" verify --version "$RELEASE_TAG" --homedir "$RUNNER_TEMP/central-gnupg"
+      - name: Automatically validate and publish the exact verified bundle
+        if: needs.prepare.outputs.mode == 'publish'
+        env:
+          CENTRAL_TOKEN_USERNAME: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
+          CENTRAL_TOKEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
+          CENTRAL_AUTO_PUBLISH: 'true'
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+          RELEASE_COMMIT: ${{ needs.prepare.outputs.commit }}
+          DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+        shell: bash
+        run: |
+          python3 "$RUNNER_TEMP/central-tools/central_release.py" publish --version "$RELEASE_TAG" --commit "$RELEASE_COMMIT" --deployment-id "$DEPLOYMENT_ID"
+      - name: Save verified bundle and deployment receipt
+        if: always() && hashFiles('target/central-publishing/central-bundle.zip') != ''
+        uses: actions/upload-artifact@v6
+        with:
+          name: central-${{ needs.prepare.outputs.tag }}
+          path: |
+            target/central-publishing/central-bundle.zip
+            target/central-publishing/deployment.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Remove temporary signing home and settings
+        if: always()
+        shell: bash
+        run: |
+          rm -rf -- "$RUNNER_TEMP/central-gnupg"
+          rm -f -- "$RUNNER_TEMP/central-settings/settings.xml"
+
+  resume:
+    needs: prepare
+    if: needs.prepare.outputs.already_published != 'true' && needs.prepare.outputs.mode == 'publish' && inputs.deployment_id != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - name: Resume the existing deployment without rebuilding or signing
+        env:
+          CENTRAL_TOKEN_USERNAME: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
+          CENTRAL_TOKEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
+          CENTRAL_AUTO_PUBLISH: 'true'
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+          RELEASE_COMMIT: ${{ needs.prepare.outputs.commit }}
+          DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+        shell: bash
+        run: |
+          python3 .github/scripts/central_release.py publish --version "$RELEASE_TAG" --commit "$RELEASE_COMMIT" --deployment-id "$DEPLOYMENT_ID" --receipt deployment.json
+      - name: Save deployment receipt
+        if: always() && hashFiles('deployment.json') != ''
+        uses: actions/upload-artifact@v6
+        with:
+          name: central-resume-${{ needs.prepare.outputs.tag }}
+          path: deployment.json
+          if-no-files-found: error
+          retention-days: 7

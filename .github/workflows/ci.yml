@@ -19,5 +19,7 @@ jobs:
           distribution: temurin
           java-version: ${{ matrix.java }}
           cache: maven
+      - name: Release workflow guard tests
+        run: python3 -B -m unittest discover -s .github/tests -p "test_*.py"
       - name: Tests, strict Javadoc, formatting and packaged consumer
         run: bash ./mvnw -B -ntp verify
