@@ -2,11 +2,34 @@
 
 ## Development version 1.1.0-SNAPSHOT
 
+### Approved cleanup verification
+
+Verified on October 20, 2026 with Temurin JDK 21.0.12.1 and Maven Wrapper 3.9.11:
+
+- After `clean`, offline `verify` passed 122 main tests and three packaged-consumer tests,
+  strict Javadoc and formatting validation of 70 Java files. The consumer's existing local
+  dependency/plugin cache was restored after cleaning to avoid network downloads.
+- Null geometry regressions first reproduced four failures, then passed with explicit
+  `IllegalArgumentException` validation. Settings tests preserve replacement, late overrides,
+  deferred validation and exporter independence when reusing a builder.
+- Both complete quick-start Java examples compile with `--release 17` against the packaged
+  development JAR and run on JDK 21. The first writes valid `mxfile` XML; the invalid-input
+  example reports `Cannot create diagram: Unknown target node: missing`.
+- Public `javap` signatures of all 46 non-internal packaged classes match the pre-cleanup JAR.
+  Independent read-only diff review found no actionable findings. Changed documentation's local
+  file links resolve.
+
+This cleanup was not rerun on a JDK 17 runtime or through the draw.io browser UI. It changes
+validation and configuration ownership, without changing layout/rendering or public signatures.
+
+### Earlier feature verification
+
 Verified locally on October 20, 2026, on Windows with Temurin JDK 17.0.20.1 and
 JDK 21.0.12.1, using Maven Wrapper 3.9.11. The checks cover explicit leaf dimensions,
 the reusable `DrawioExport` result, layout settings and internal package organization.
 
-- The main suite contains 115 tests; the separate packaged Maven consumer has three tests.
+- At this earlier verification point, the main suite contained 115 tests and the separate
+  packaged Maven consumer had three tests.
   `verify` passes on both JDK 17 and 21, including strict Javadoc and formatting.
   Coverage includes mixed shapes and sizes, all layout directions, nested groups,
   cross-group/self/parallel connections, immutable snapshots and custom layout geometry.

@@ -3,7 +3,9 @@
 Local release coordinates: `io.github.saqqqner:diagram-kiln:1.0.1`.
 The `main` branch and tag `1.0.1` contain the release. The `dev` branch develops
 `1.1.0-SNAPSHOT`. Tags use no prefix. Run the build on the matching branch to select
-release or snapshot coordinates.
+release or snapshot coordinates. In a clean checkout, use `git switch --detach 1.0.1`
+for the stable release or `git switch dev` for development, then run the build below. Application
+dependency versions must match the installed version; see the [quick start](../README.md#install).
 
 Remote publication is not configured. Artifacts are installed in the local Maven repository.
 

@@ -2,7 +2,6 @@ package io.github.saqqqner.diagramkiln;
 
 import io.github.saqqqner.diagramkiln.config.Direction;
 import io.github.saqqqner.diagramkiln.config.LayoutOptions;
-import io.github.saqqqner.diagramkiln.config.LayeredLayoutOptions;
 import io.github.saqqqner.diagramkiln.internal.validation.DiagramValidator;
 import io.github.saqqqner.diagramkiln.internal.xml.DrawioXmlWriter;
 import io.github.saqqqner.diagramkiln.layout.ElkLayout;
@@ -91,19 +90,7 @@ public final class DrawioExporter {
    */
   public static final class Builder {
     private LayoutEngine layout = new ElkLayout();
-    private Direction direction = Direction.RIGHT;
-    private double width = 160;
-    private double height = 60;
-    private double nodeSpacing = 40;
-    private double layerSpacing = 80;
-    private double groupPadding = 20;
-    private boolean feedbackEdges = false;
-    private boolean preserveNodeOrder = false;
-    private double edgeNodeSpacing = 10;
-    private double edgeSpacing = 10;
-    private double edgeSpacingBetweenLayers = 10;
-    private double portSpacing = 10;
-    private LayeredLayoutOptions layered = LayeredLayoutOptions.defaults();
+    private LayoutOptions.Builder options = LayoutOptions.builder();
 
     private Builder() {
     }
@@ -128,7 +115,7 @@ public final class DrawioExporter {
      * @return this builder
      */
     public Builder direction(Direction direction) {
-      this.direction = direction;
+      options.direction(direction);
       return this;
     }
 
@@ -142,8 +129,7 @@ public final class DrawioExporter {
      * @return this builder
      */
     public Builder nodeSize(double width, double height) {
-      this.width = width;
-      this.height = height;
+      options.nodeSize(width, height);
       return this;
     }
 
@@ -160,19 +146,13 @@ public final class DrawioExporter {
     public Builder layoutOptions(LayoutOptions options) {
       if (options == null)
         throw new IllegalArgumentException("layout options must not be null");
-      direction = options.direction();
-      width = options.nodeWidth();
-      height = options.nodeHeight();
-      nodeSpacing = options.nodeSpacing();
-      layerSpacing = options.layerSpacing();
-      groupPadding = options.groupPadding();
-      feedbackEdges = options.feedbackEdges();
-      preserveNodeOrder = options.preserveNodeOrder();
-      edgeNodeSpacing = options.edgeNodeSpacing();
-      edgeSpacing = options.edgeSpacing();
-      edgeSpacingBetweenLayers = options.edgeSpacingBetweenLayers();
-      portSpacing = options.portSpacing();
-      layered = options.layered();
+      this.options = LayoutOptions.builder().direction(options.direction())
+          .nodeSize(options.nodeWidth(), options.nodeHeight()).nodeSpacing(options.nodeSpacing())
+          .layerSpacing(options.layerSpacing()).groupPadding(options.groupPadding())
+          .feedbackEdges(options.feedbackEdges()).preserveNodeOrder(options.preserveNodeOrder())
+          .edgeNodeSpacing(options.edgeNodeSpacing()).edgeSpacing(options.edgeSpacing())
+          .edgeSpacingBetweenLayers(options.edgeSpacingBetweenLayers())
+          .portSpacing(options.portSpacing()).layeredOptions(options.layered());
       return this;
     }
 
@@ -186,10 +166,7 @@ public final class DrawioExporter {
     public DrawioExporter build() {
       if (layout == null)
         throw new IllegalArgumentException("layout engine must not be null");
-      return new DrawioExporter(layout,
-          new LayoutOptions(direction, width, height, nodeSpacing, layerSpacing, groupPadding,
-              feedbackEdges, preserveNodeOrder, edgeNodeSpacing, edgeSpacing,
-              edgeSpacingBetweenLayers, portSpacing, layered));
+      return new DrawioExporter(layout, options.build());
     }
   }
 }

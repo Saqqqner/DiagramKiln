@@ -316,7 +316,10 @@ move with it.
 
 IllegalArgumentException covers null required values, blank/duplicate ids, unknown endpoints,
 invalid XML 1.0 characters, invalid styles/dimensions and invalid custom layout geometry. Empty
-labels are allowed. XML infrastructure failures are wrapped in IllegalStateException.
+labels are allowed. `LayoutResult` and `RoutedEdge` reject null lists and null list elements
+immediately with `IllegalArgumentException` identifying the field (and route index for points).
+Custom layout engines may propagate their own exceptions; the exporter does not translate
+arbitrary engine failures. XML infrastructure failures are wrapped in IllegalStateException.
 
 Each export contains one page. Labels are escaped plain text, without HTML interpretation.
 Leaf bounds are fixed; increase the individual size or global nodeSize for longer text or larger

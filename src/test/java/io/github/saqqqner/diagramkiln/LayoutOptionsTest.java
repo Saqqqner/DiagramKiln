@@ -32,6 +32,44 @@ class LayoutOptionsTest {
   }
 
   @Test
+  void replacesEveryOptionAndPreservesOverridesAcrossBuilderReuse() {
+    var supplied = LayoutOptions.builder().direction(Direction.DOWN).nodeSize(201, 81)
+        .nodeSpacing(21).layerSpacing(71).groupPadding(19).feedbackEdges(true)
+        .preserveNodeOrder(true).edgeNodeSpacing(31).edgeSpacing(32).edgeSpacingBetweenLayers(33)
+        .portSpacing(34).layered(l -> l.thoroughness(42)).build();
+    var seen = new AtomicReference<LayoutOptions>();
+    var builder = DrawioExporter.builder().direction(Direction.UP).nodeSize(1, 2)
+        .layout((data, options) -> {
+          seen.set(options);
+          return new LayoutResult(List.of(), List.of());
+        }).layoutOptions(supplied);
+    var captured = builder.build();
+    var overridden = builder.direction(Direction.LEFT).nodeSize(220, 90).build();
+    var empty = Diagrams.diagram("Empty").build();
+    captured.toXml(empty);
+    assertEquals(supplied, seen.get());
+    overridden.toXml(empty);
+    var expected = new LayoutOptions(Direction.LEFT, 220, 90, 21, 71, 19, true, true, 31, 32, 33,
+        34, supplied.layered());
+    assertEquals(expected, seen.get());
+    builder.layoutOptions(LayoutOptions.builder().build()).build().toXml(empty);
+    assertEquals(LayoutOptions.builder().build(), seen.get());
+    overridden.toXml(empty);
+    assertEquals(expected, seen.get());
+  }
+
+  @Test
+  void replacementCanRecoverDeferredInvalidOverrides() {
+    var options = LayoutOptions.builder().build();
+    DrawioExporter.builder().direction(null).nodeSize(Double.NaN, -1).layoutOptions(options).build()
+        .toXml(Diagrams.diagram("Empty").build());
+    var builder = DrawioExporter.builder().layoutOptions(options).direction(null);
+    assertThrows(IllegalArgumentException.class, builder::build);
+    builder.direction(Direction.RIGHT).nodeSize(-1, 60);
+    assertThrows(IllegalArgumentException.class, builder::build);
+  }
+
+  @Test
   void rejectsInvalidLayoutSpacing() {
     for (double invalid : new double[]
     {-1, Double.NaN, Double.POSITIVE_INFINITY

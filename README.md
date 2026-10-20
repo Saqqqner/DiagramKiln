@@ -17,7 +17,14 @@ Requires **Java 17+**.
 The latest release is **1.0.1** (tag `1.0.1`). This branch develops **1.1.0-SNAPSHOT**.
 Artifacts are not yet published to a public Maven repository.
 
-First build and install it from the project root:
+Use a clean checkout and choose the version you want before building:
+
+| Version | Select source | Application dependency version |
+| --- | --- | --- |
+| Stable release | `git switch --detach 1.0.1` | `1.0.1` |
+| Development APIs documented on this branch | `git switch dev` | `1.1.0-SNAPSHOT` |
+
+Build and install the selected version from the project root:
 
 ```powershell
 ./mvnw.cmd clean install
@@ -35,11 +42,16 @@ Then add this dependency to your application's `pom.xml`:
 <dependency>
   <groupId>io.github.saqqqner</groupId>
   <artifactId>diagram-kiln</artifactId>
-  <version>1.1.0-SNAPSHOT</version>
+  <version>1.0.1</version>
 </dependency>
 ```
 
+For a `dev` build, replace the dependency version with `1.1.0-SNAPSHOT`.
+The dependency version must match the version you installed locally.
 Maven brings in ELK and the other runtime dependencies automatically.
+
+The first diagram below works with both versions. Later sections describe the development
+API, including features that are unavailable in 1.0.1; select `dev` to use those examples.
 
 ## Create your first diagram
 
@@ -71,6 +83,36 @@ public class OrderDiagram {
 Open `order.drawio` in draw.io using **File → Open From → Device**.
 Positions and routes are calculated automatically. You can edit the resulting nodes,
 connections and labels in draw.io.
+
+## Handle invalid diagram data
+
+The DSL validates the graph at `build()`; exporting application DTOs validates them before
+layout. Catch `IllegalArgumentException` at that boundary to report invalid input:
+
+```java
+import io.github.saqqqner.diagramkiln.Diagrams;
+import io.github.saqqqner.diagramkiln.DrawioExporter;
+
+public class InvalidDiagramExample {
+  public static void main(String[] args) {
+    try {
+      var diagram = Diagrams.diagram("Order statuses")
+          .node("new", "New")
+          .edge("new", "missing", "Payment")
+          .build();
+      String xml = DrawioExporter.create().toXml(diagram);
+      System.out.println(xml);
+    }
+    catch (IllegalArgumentException exception) {
+      System.err.println("Cannot create diagram: " + exception.getMessage());
+    }
+  }
+}
+```
+
+This prints `Cannot create diagram: Unknown target node: missing`. File-writing failures are
+separate I/O errors; handle `IOException` when saving XML in application code.
+See [errors and limitations](docs/USER-GUIDE.md#errors-and-limitations) for validation rules.
 
 ## Group related elements
 
