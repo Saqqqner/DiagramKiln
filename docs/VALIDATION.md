@@ -25,7 +25,8 @@ topology still requires zooming to read individual labels.
 
 A separate native file-open check could not be completed through the browser's file chooser.
 The XML and URL payload are verified to contain the same model by automated decoding tests.
-Remote GitHub Actions have not been run as part of these local checks.
+Remote CI results are tracked separately in the
+[GitHub Actions runs](https://github.com/Saqqqner/DiagramKiln/actions).
 
 ### Feedback edges and node order
 
@@ -46,6 +47,11 @@ The updated fixture is [order-status.drawio](../examples/order-status.drawio), w
 [browser preview](../examples/order-status-preview.png).
 
 ### Advanced Layered settings
+
+The first remote Java 21 build of this extension passed all 115 tests but failed strict
+Javadoc with 12 missing main descriptions. A clean local JDK 21 package reproduced the
+failure. Method descriptions now use prose or inline return tags; clean verification is
+required separately on each JDK to avoid reusing generated documentation.
 
 All nine cycle-breaking strategies, five node-placement strategies and six alignments from
 the pinned ELK 0.11.0 dependency run on a nested cyclic graph with a cross-group connection.

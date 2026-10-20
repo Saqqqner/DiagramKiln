@@ -25,3 +25,4 @@
 - Java 17 baseline; source/Javadoc artifacts, Maven Wrapper and packaged-consumer checks.
 - Typed Layered strategies, alignment and search effort, with edge and port spacing settings.
 - Per-leaf FIRST/LAST layer constraints in the DSL and optional application DTO interface.
+- Complete method Javadoc descriptions for clean builds with strict JDK 21 checks.

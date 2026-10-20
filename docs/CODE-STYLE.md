@@ -55,6 +55,10 @@ required values, units, coordinate systems, snapshot behavior, failure behavior 
 or resource ownership. Document nontrivial public APIs without repeating trivial accessor
 names or adding boilerplate. Keep internal implementation details out of user-facing examples.
 
+Include a main description in method Javadoc; block tags alone trigger warnings on JDK 21.
+For a simple return-only description, use the inline `{@return ...}` form.
+Run a clean build when switching verification JDKs so generated Javadoc is not reused.
+
 ## Git
 
 Use Conventional Commits: `<type>: <description>`, with types such as `feat`, `fix`,

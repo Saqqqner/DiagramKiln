@@ -17,11 +17,11 @@ public record NodeLayout(LayerConstraint layerConstraint) {
     if (layerConstraint == null)
       throw new IllegalArgumentException("layerConstraint must not be null");
   }
-  /** @return unconstrained leaf settings */
+  /** {@return unconstrained leaf settings} */
   public static NodeLayout defaults() {
     return new NodeLayout(LayerConstraint.NONE);
   }
-  /** @return a mutable builder */
+  /** {@return a mutable builder} */
   public static Builder builder() {
     return new Builder();
   }
@@ -31,6 +31,8 @@ public record NodeLayout(LayerConstraint layerConstraint) {
     private Builder() {
     }
     /**
+     * Constrains the leaf's layer within its containing graph.
+     *
      * @param value
      *          non-null constraint
      * @return this builder
@@ -39,7 +41,7 @@ public record NodeLayout(LayerConstraint layerConstraint) {
       layerConstraint = value;
       return this;
     }
-    /** @return validated immutable settings */
+    /** {@return validated immutable settings} */
     public NodeLayout build() {
       return new NodeLayout(layerConstraint);
     }

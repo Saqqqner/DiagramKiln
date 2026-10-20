@@ -33,12 +33,12 @@ public record LayeredLayoutOptions(CycleBreaking cycleBreaking, NodePlacement no
       throw new IllegalArgumentException("thoroughness must be positive");
   }
 
-  /** @return the ELK 0.11 defaults used by legacy exports */
+  /** {@return the ELK 0.11 defaults used by legacy exports} */
   public static LayeredLayoutOptions defaults() {
     return builder().build();
   }
 
-  /** @return a new mutable builder */
+  /** {@return a new mutable builder} */
   public static Builder builder() {
     return new Builder();
   }
@@ -52,6 +52,8 @@ public record LayeredLayoutOptions(CycleBreaking cycleBreaking, NodePlacement no
     private Builder() {
     }
     /**
+     * Selects how directed cycles are broken before layer assignment.
+     *
      * @param value
      *          non-null strategy
      * @return this builder
@@ -61,6 +63,8 @@ public record LayeredLayoutOptions(CycleBreaking cycleBreaking, NodePlacement no
       return this;
     }
     /**
+     * Selects how nodes are positioned after layer assignment and crossing minimization.
+     *
      * @param value
      *          non-null strategy
      * @return this builder
@@ -70,6 +74,8 @@ public record LayeredLayoutOptions(CycleBreaking cycleBreaking, NodePlacement no
       return this;
     }
     /**
+     * Selects the ELK graph alignment.
+     *
      * @param value
      *          non-null alignment
      * @return this builder
@@ -79,6 +85,8 @@ public record LayeredLayoutOptions(CycleBreaking cycleBreaking, NodePlacement no
       return this;
     }
     /**
+     * Sets the search effort used by ELK Layered.
+     *
      * @param value
      *          positive search effort
      * @return this builder
@@ -87,7 +95,7 @@ public record LayeredLayoutOptions(CycleBreaking cycleBreaking, NodePlacement no
       thoroughness = value;
       return this;
     }
-    /** @return validated immutable settings */
+    /** {@return validated immutable settings} */
     public LayeredLayoutOptions build() {
       return new LayeredLayoutOptions(cycleBreaking, nodePlacement, alignment, thoroughness);
     }

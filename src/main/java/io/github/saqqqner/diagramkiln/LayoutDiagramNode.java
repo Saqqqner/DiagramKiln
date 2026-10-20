@@ -7,6 +7,6 @@ import io.github.saqqqner.diagramkiln.config.NodeLayout;
  * cannot implement this capability. Do not mutate while input is captured.
  */
 public interface LayoutDiagramNode extends DiagramNode {
-  /** @return non-null immutable per-leaf layout settings */
+  /** {@return non-null immutable per-leaf layout settings} */
   NodeLayout layout();
 }
