@@ -277,4 +277,8 @@ Generated API documentation is available at `target/reports/apidocs/index.html` 
 
 ## License
 
-[MIT](LICENSE).
+[MIT](LICENSE) for DiagramKiln's own code. Runtime dependencies retain their own
+licenses; see [third-party components and build-tool notices](THIRD-PARTY.md).
+
+DiagramKiln is independent and is not affiliated with or endorsed by draw.io,
+diagrams.net, or JGraph. Those names describe the intended export interoperability.

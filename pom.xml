@@ -93,7 +93,11 @@
         <directory>${project.basedir}</directory>
         <targetPath>META-INF</targetPath>
         <filtering>false</filtering>
-        <includes><include>LICENSE</include></includes>
+        <includes>
+          <include>LICENSE</include>
+          <include>THIRD-PARTY.md</include>
+          <include>licenses/**</include>
+        </includes>
       </resource>
     </resources>
     <plugins>

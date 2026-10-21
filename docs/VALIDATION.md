@@ -84,7 +84,7 @@ the left side of draft. Approved appears above rejected in the same layer, match
 declaration order. Node ordering does not constrain layer assignment or disconnected
 component packing, and feedback routing does not force one shared center attachment.
 The updated fixture is [order-status.drawio](../examples/order-status.drawio), with a
-[browser preview](../examples/order-status-preview.png).
+[diagram-only preview](../examples/order-status-preview.png).
 
 ### Advanced Layered settings
 
@@ -109,7 +109,7 @@ The updated status example uses DFS_NODE_ORDER, NETWORK_SIMPLEX, CENTER, thoroug
 80-pixel edge clearances, 20-pixel port spacing and FIRST on its initial status. Its packaged
 Java 17 example exports successfully and opens in draw.io: the initial status is leftmost,
 the rejected-to-draft transition enters from the left, and approved remains above rejected.
-The [browser preview](../examples/order-status-preview.png) records this check. Interactive
+The [diagram-only preview](../examples/order-status-preview.png) records this check. Interactive
 strategies are selectable but the DSL does not provide initial coordinates for position
 preservation. Existing constructor overloads are exercised by the packaged consumer.
 
@@ -156,7 +156,7 @@ The release run produced target/release-thirty.drawio; the checked-in example is
 examples/thirty-nodes.drawio.
 
 The XML model was opened in draw.io. All 30 leaves and seven containers display, including
-cross-group edges, a loop and parallel transitions. Screenshot: examples/thirty-nodes-preview.png.
+cross-group edges, a loop and parallel transitions. Diagram-only preview: examples/thirty-nodes-preview.png.
 This topology produces a tall layout, requiring a small zoom for an overview. ELK does not
 guarantee compact placement for arbitrary topologies.
 
@@ -194,10 +194,10 @@ Both were imported through Edit Diagram and visually inspected on October 19, 20
 - examples/visual-layout.drawio uses real ELK, DOWN direction, 180 by 60 leaves, spacing 50/90
   and group padding 30. It shows rounding values 12/45, local transitions, a connection between
   leaves in different groups and a separate blue container connection.
-  Screenshot: examples/visual-layout-preview.png.
+  Diagram-only preview: examples/visual-layout-preview.png.
 - examples/visual-jumps.drawio uses identical fixed geometry for NONE/ARC/GAP/SHARP comparisons.
   Curved bridges, gaps and angular bridges display, along with green rounded bends (arcSize=30)
-  and different target arrow sizes (2/12). Screenshot: examples/visual-jumps-preview.png.
+  and different target arrow sizes (2/12). Diagram-only preview: examples/visual-jumps-preview.png.
 
 The crossing fixture deliberately uses a custom LayoutEngine to guarantee intersections. The
 other fixture and automated tests cover actual ELK settings. No implementation changes were
@@ -215,7 +215,36 @@ simplified. XML: 2613 characters; fragment: 1252. The generated URL in
 examples/fragment-example-url.txt was opened directly in draw.io without manual XML import.
 Both groups, their connection, literal 100% +, %20, <OK>, emoji, line breaks and punctuation
 ! ' ( ) ~ * ? # / = and double quotes display correctly.
-Screenshot: examples/fragment-example-preview.png.
+Diagram-only preview: examples/fragment-example-preview.png.
 
 The build checks 50 Java files after package-info removal. Local release artifacts are installed
 in the local Maven repository. No remote publication was performed.
+
+
+## Diagram-only preview exports
+
+The six checked-in `examples/*-preview.png` images are diagram-only exports,
+regenerated with draw.io Desktop 32.5.5 from their matching `.drawio` fixtures.
+They replace earlier screenshots of the editor. The XML geometry, labels,
+connections and styles are unchanged; the export uses a light background,
+scale 1 and a 16-pixel border. No layout or normalization is applied. The PNGs
+contain neither the editor interface nor the draw.io logo.
+
+To reproduce a preview with the official draw.io Desktop CLI:
+
+```powershell
+& $drawio --export --format png --theme light --scale 1 --border 16 --output examples/fragment-example-preview.png examples/fragment-example.drawio
+```
+
+Set `$drawio` to the path of the draw.io Desktop executable. Repeat for
+`nested-crafting`, `order-status`, `thirty-nodes`, `visual-jumps` and `visual-layout`.
+The corresponding PNGs were visually checked after export. Historical browser
+observations above describe the original interactive checks; replacing their
+screenshots does not claim a new interactive browser session.
+
+`fragment-example-url.txt` is regenerated from `fragment-example.drawio`. Decoding
+its `#R` fragment must reproduce that UTF-8 XML, including the DiagramKiln page
+title. The URL is an export example, not an endorsement by the editor vendor.
+
+The package includes the project's MIT license and the scoped third-party
+inventory and Wrapper notices described in [THIRD-PARTY.md](../THIRD-PARTY.md).
