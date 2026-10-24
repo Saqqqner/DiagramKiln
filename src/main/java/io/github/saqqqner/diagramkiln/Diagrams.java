@@ -2,6 +2,8 @@ package io.github.saqqqner.diagramkiln;
 
 import io.github.saqqqner.diagramkiln.dto.DefaultDiagram;
 import io.github.saqqqner.diagramkiln.dto.DefaultEdge;
+import io.github.saqqqner.diagramkiln.dto.EdgeLabelSize;
+import io.github.saqqqner.diagramkiln.dto.SizedEdge;
 import io.github.saqqqner.diagramkiln.dto.DefaultGroup;
 import io.github.saqqqner.diagramkiln.dto.DefaultNode;
 import io.github.saqqqner.diagramkiln.dto.NodeSize;
@@ -191,6 +193,30 @@ public final class Diagrams {
      */
     public Builder edge(String sourceId, String targetId, String label, EdgeStyle style) {
       edges.add(new DefaultEdge(sourceId, targetId, label, style));
+      return this;
+    }
+
+    /**
+     * Adds a styled connection with explicit reserved label dimensions. Placement requires enabling
+     * edge labels on the exporter; dimensions do not enable automatic text measurement.
+     *
+     * @param sourceId
+     *          global source id
+     * @param targetId
+     *          global target id
+     * @param label
+     *          plain text connection label
+     * @param style
+     *          non-null connection appearance
+     * @param labelSize
+     *          non-null reserved label dimensions
+     * @return this builder
+     * @throws IllegalArgumentException
+     *           if labelSize is null
+     */
+    public Builder edge(String sourceId, String targetId, String label, EdgeStyle style,
+        EdgeLabelSize labelSize) {
+      edges.add(new SizedEdge(sourceId, targetId, label, style, labelSize));
       return this;
     }
 

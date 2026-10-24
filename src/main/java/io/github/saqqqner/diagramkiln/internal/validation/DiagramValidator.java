@@ -5,6 +5,8 @@ import io.github.saqqqner.diagramkiln.DiagramEdge;
 import io.github.saqqqner.diagramkiln.DiagramGroup;
 import io.github.saqqqner.diagramkiln.DiagramNode;
 import io.github.saqqqner.diagramkiln.SizedDiagramNode;
+import io.github.saqqqner.diagramkiln.SizedDiagramEdge;
+import io.github.saqqqner.diagramkiln.dto.SizedEdge;
 import io.github.saqqqner.diagramkiln.LayoutDiagramNode;
 import io.github.saqqqner.diagramkiln.dto.LayoutNode;
 import io.github.saqqqner.diagramkiln.dto.SizedLayoutNode;
@@ -97,7 +99,16 @@ public final class DiagramValidator {
       String target = id(edge.targetId(), "edge.targetId");
       var style = edge.style();
       requireStyle(style, "edge");
-      edges.add(new DefaultEdge(source, target, text(edge.label(), "edge.label"), style));
+      String label = text(edge.label(), "edge.label");
+      if (edge instanceof SizedDiagramEdge sized) {
+        var size = sized.labelSize();
+        if (size == null)
+          throw new IllegalArgumentException(
+              "edge " + source + " -> " + target + " label size must not be null");
+        edges.add(new SizedEdge(source, target, label, style, size));
+      }
+      else
+        edges.add(new DefaultEdge(source, target, label, style));
     }
     active.remove(data);
     return new DefaultDiagram(name, nodes, edges);

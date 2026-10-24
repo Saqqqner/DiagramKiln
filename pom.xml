@@ -66,6 +66,12 @@
     </dependencies>
   </dependencyManagement>
   <dependencies>
+    <!-- Expose the pinned runtime version to downstream consumers as a nearer dependency. -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
+    </dependency>
     <!-- ELK's OSGi manifest requires Xbase, but its published POM omits it. -->
     <dependency>
       <groupId>org.eclipse.xtext</groupId>

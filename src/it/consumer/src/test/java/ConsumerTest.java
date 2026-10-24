@@ -16,6 +16,11 @@ import io.github.saqqqner.diagramkiln.Diagrams;
 import io.github.saqqqner.diagramkiln.DrawioExporter;
 import io.github.saqqqner.diagramkiln.SizedDiagramNode;
 import io.github.saqqqner.diagramkiln.dto.NodeSize;
+import io.github.saqqqner.diagramkiln.dto.EdgeLabelSize;
+import io.github.saqqqner.diagramkiln.dto.LayoutResult;
+import io.github.saqqqner.diagramkiln.layout.LayoutEngine;
+import org.w3c.dom.Element;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import io.github.saqqqner.diagramkiln.config.Direction;
 import io.github.saqqqner.diagramkiln.config.LayoutOptions;
 import io.github.saqqqner.diagramkiln.config.Alignment;
@@ -32,6 +37,48 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ConsumerTest {
+  @Test
+  void consumesOptInEdgeLabelsAndLegacyEngineFromPackagedJar() throws Exception {
+    var data = Diagrams.diagram("Consumer labels")
+        .group("g", "Group",
+            group -> group.node("a", "A").node("b", "B").edge("a", "b", "Sized",
+                EdgeStyle.defaults(), new EdgeLabelSize(240, 50)))
+        .node("c", "C").edge("b", "c", "Fallback").build();
+    var xml = DrawioExporter.builder().edgeLabels(new EdgeLabelSize(140, 30)).build().toXml(data);
+    var document = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+        .parse(new InputSource(new StringReader(xml)));
+    var cells = document.getElementsByTagName("mxCell");
+    String groupId = null;
+    for (int i = 0; i < cells.getLength(); i++) {
+      var cell = (Element) cells.item(i);
+      if (cell.getAttribute("value").equals("Group"))
+        groupId = cell.getAttribute("id");
+    }
+    assertNotNull(groupId);
+    int labels = 0;
+    for (int i = 0; i < cells.getLength(); i++) {
+      var cell = (Element) cells.item(i);
+      if (!cell.getAttribute("edge").equals("1"))
+        continue;
+      var geometry = (Element) cell.getElementsByTagName("mxGeometry").item(0);
+      boolean sized = cell.getAttribute("value").equals("Sized");
+      assertEquals(sized ? 240 : 140, Double.parseDouble(geometry.getAttribute("width")));
+      assertEquals(sized ? 50 : 30, Double.parseDouble(geometry.getAttribute("height")));
+      assertEquals(sized ? groupId : "1", cell.getAttribute("parent"));
+      assertTrue(geometry.getElementsByTagName("mxPoint").getLength() > 0);
+      labels++;
+    }
+    assertEquals(2, labels);
+    LayoutEngine legacy = (diagram, options) -> new LayoutResult(List.of(), List.of());
+    var empty = Diagrams.diagram("Legacy").build();
+    assertTrue(
+        DrawioExporter.builder().layout(legacy).build().toXml(empty).contains("mxGraphModel"));
+    assertThrows(UnsupportedOperationException.class, () -> DrawioExporter.builder().layout(legacy)
+        .edgeLabels(new EdgeLabelSize(100, 20)).build().toXml(empty));
+    var nullStyle = Diagrams.diagram("Null style").node("a", "A").edge("a", "a", "Text", null);
+    assertThrows(IllegalArgumentException.class, nullStyle::build);
+  }
+
   @Test
   void consumesAdvancedLayoutAndLegacyConstructors() {
     var first = NodeLayout.builder().layerConstraint(LayerConstraint.FIRST).build();

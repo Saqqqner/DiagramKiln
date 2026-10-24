@@ -18,7 +18,7 @@ package io.github.saqqqner.diagramkiln.style;
  * @param fontColor
  *          text color (#RRGGBB)
  * @param fontSize
- *          text size in points
+ *          text size in pixels
  * @param bold
  *          whether text is bold
  * @param arcSize
@@ -46,7 +46,7 @@ public record NodeStyle(NodeShape shape, boolean rounded, String fillColor, Stri
    * @param fontColor
    *          text color
    * @param fontSize
-   *          text size in points
+   *          text size in pixels
    * @param bold
    *          whether text is bold
    */
@@ -74,7 +74,7 @@ public record NodeStyle(NodeShape shape, boolean rounded, String fillColor, Stri
    * @param fontColor
    *          text color (#RRGGBB)
    * @param fontSize
-   *          text size in points
+   *          text size in pixels
    * @param bold
    *          whether text is bold
    * @param arcSize
@@ -223,10 +223,10 @@ public record NodeStyle(NodeShape shape, boolean rounded, String fillColor, Stri
     }
 
     /**
-     * Sets text size in points.
+     * Sets text size in pixels.
      *
      * @param value
-     *          text size in points
+     *          text size in pixels
      * @return this builder
      */
     public Builder fontSize(double value) {

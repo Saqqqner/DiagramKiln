@@ -2,6 +2,7 @@ package io.github.saqqqner.diagramkiln;
 
 import io.github.saqqqner.diagramkiln.config.Direction;
 import io.github.saqqqner.diagramkiln.config.LayoutOptions;
+import io.github.saqqqner.diagramkiln.dto.EdgeLabelSize;
 import io.github.saqqqner.diagramkiln.internal.validation.DiagramValidator;
 import io.github.saqqqner.diagramkiln.internal.xml.DrawioXmlWriter;
 import io.github.saqqqner.diagramkiln.layout.ElkLayout;
@@ -15,10 +16,12 @@ import io.github.saqqqner.diagramkiln.layout.LayoutEngine;
 public final class DrawioExporter {
   private final LayoutEngine layout;
   private final LayoutOptions options;
+  private final EdgeLabelSize edgeLabelSize;
 
-  private DrawioExporter(LayoutEngine layout, LayoutOptions options) {
+  private DrawioExporter(LayoutEngine layout, LayoutOptions options, EdgeLabelSize edgeLabelSize) {
     this.layout = layout;
     this.options = options;
+    this.edgeLabelSize = edgeLabelSize;
   }
 
   /**
@@ -43,9 +46,15 @@ public final class DrawioExporter {
    * @return an uncompressed, editable single-page draw.io document
    * @throws IllegalArgumentException
    *           if the input graph or returned layout geometry is invalid
+   * @throws UnsupportedOperationException
+   *           if label placement is enabled but the engine does not support it
    */
   public String toXml(DiagramData diagram) {
     var snapshot = DiagramValidator.snapshot(diagram);
+    if (edgeLabelSize != null) {
+      var result = layout.layoutWithEdgeLabels(snapshot, options, edgeLabelSize);
+      return new DrawioXmlWriter().write(snapshot, result);
+    }
     var result = layout.layout(snapshot, options);
     return new DrawioXmlWriter().write(snapshot, result);
   }
@@ -62,6 +71,8 @@ public final class DrawioExporter {
    * @return #R followed by URI-escaped Base64 of raw-DEFLATE-compressed URI-encoded XML
    * @throws IllegalArgumentException
    *           if the input graph or returned layout geometry is invalid
+   * @throws UnsupportedOperationException
+   *           if label placement is enabled but the engine does not support it
    */
   public String toDrawioFragment(DiagramData diagram) {
     return new DrawioXmlWriter().writeFragment(toXml(diagram));
@@ -79,6 +90,8 @@ public final class DrawioExporter {
    * @return two immutable strings describing the same captured input and geometry
    * @throws IllegalArgumentException
    *           if input or layout geometry is invalid
+   * @throws UnsupportedOperationException
+   *           if label placement is enabled but the engine does not support it
    */
   public DrawioExport export(DiagramData diagram) {
     String xml = toXml(diagram);
@@ -91,6 +104,7 @@ public final class DrawioExporter {
   public static final class Builder {
     private LayoutEngine layout = new ElkLayout();
     private LayoutOptions.Builder options = LayoutOptions.builder();
+    private EdgeLabelSize edgeLabelSize;
 
     private Builder() {
     }
@@ -104,6 +118,35 @@ public final class DrawioExporter {
      */
     public Builder layout(LayoutEngine layout) {
       this.layout = layout;
+      return this;
+    }
+
+    /**
+     * Enables explicit-size edge-label placement. Per-edge dimensions override this fallback.
+     * Existing custom engines must implement the labeled operation. Sizes reserve space; they do
+     * not measure text or guarantee automatic word wrapping.
+     *
+     * @param fallbackSize
+     *          non-null reserved dimensions for labels without an explicit size
+     * @return this builder
+     * @throws IllegalArgumentException
+     *           if fallbackSize is null
+     */
+    public Builder edgeLabels(EdgeLabelSize fallbackSize) {
+      if (fallbackSize == null)
+        throw new IllegalArgumentException("edge label fallback size must not be null");
+      edgeLabelSize = fallbackSize;
+      return this;
+    }
+
+    /**
+     * Disables label-aware placement, restoring the default operation. The last call to this method
+     * or edgeLabels wins; other builder settings do not reset this choice.
+     *
+     * @return this builder
+     */
+    public Builder withoutEdgeLabels() {
+      edgeLabelSize = null;
       return this;
     }
 
@@ -166,7 +209,7 @@ public final class DrawioExporter {
     public DrawioExporter build() {
       if (layout == null)
         throw new IllegalArgumentException("layout engine must not be null");
-      return new DrawioExporter(layout, options.build());
+      return new DrawioExporter(layout, options.build(), edgeLabelSize);
     }
   }
 }
