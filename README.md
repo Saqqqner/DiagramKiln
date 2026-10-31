@@ -17,7 +17,7 @@ Requires **Java 17+**.
 The latest release is **1.1.0** (tag `1.1.0`), using Maven groupId `io.github.saqqqner`.
 The `main` branch contains the release; `dev` develops `1.2.0-SNAPSHOT`.
 Artifacts are not yet published to a public Maven repository. An opt-in Central Portal
-profile is prepared with upload disabled by default; see [publication setup](docs/PUBLISHING.md#central-portal-prerequisites).
+profile is prepared with upload disabled by default; see [publication setup](docs/PUBLISHING.md#prerequisites-and-the-first-publication-hold).
 
 Use a clean checkout and choose the version you want before building:
 
@@ -57,7 +57,7 @@ namespace does not rename Java imports or the automatic module: both remain
 Maven brings in ELK and the other runtime dependencies automatically.
 
 The first diagram works with both 1.0.1 and 1.1.0. Later sections describe the 1.1.0 API,
-including features unavailable in 1.0.1.
+including features unavailable in 1.0.1; development-only features are marked with version 1.2.0.
 
 ## Create your first diagram
 
@@ -251,6 +251,14 @@ String url = "https://app.diagrams.net/?splash=0" + result.drawioFragment();
 
 The completed result is immutable. Calling its accessors does not run layout again.
 
+## Edge-label placement (development 1.2.0)
+
+Opt in with `DrawioExporter.builder().edgeLabels(new EdgeLabelSize(160, 30)).build()` to reserve
+space for nonempty edge labels during layout. Individual edges can override the fallback size.
+Existing exports remain unchanged by default. Sizes are explicit pixel estimates; automatic
+text measurement and word wrapping are not provided. See the
+[edge-label guide](docs/USER-GUIDE.md#edge-label-aware-layout-120) for custom engines and examples.
+
 ## Examples and documentation
 
 - [Order statuses](examples/OrderStatusDiagram.java): a flat diagram.
@@ -259,11 +267,13 @@ The completed result is immutable. Calling its accessors does not run layout aga
 - [Visual styles](examples/VisualStylesDiagram.java): shapes, arrows and line crossings.
 - [XML and URL export](examples/DrawioFragmentExample.java): both output formats.
 - [Mixed node sizes](examples/MixedSizeDiagram.java): explicit sizes, nested groups and paired export.
+- [Custom layout](examples/CustomLayoutDiagram.java): fixed geometry, a group and a cross-group connection.
+- [Edge labels](examples/EdgeLabelDiagram.java): opt-in reserved sizes and editable placement (1.2.0).
 - [User guide](docs/USER-GUIDE.md): API details, custom layouts and validation rules.
 - [Validation report](docs/VALIDATION.md): checks and browser previews.
 
 Each export creates one page. Labels are plain text. Node sizes are fixed; automatic
-text sizing and separate edge-label overlap optimization are not provided.
+text measurement and global collision elimination are not provided.
 
 ## Development
 

@@ -9,6 +9,11 @@ import org.eclipse.elk.core.data.LayoutMetaDataService;
 import org.eclipse.elk.core.math.ElkPadding;
 import org.eclipse.elk.core.options.CoreOptions;
 import org.eclipse.elk.core.options.EdgeRouting;
+import org.eclipse.elk.core.options.EdgeLabelPlacement;
+import io.github.saqqqner.diagramkiln.SizedDiagramEdge;
+import io.github.saqqqner.diagramkiln.dto.EdgeLabelSize;
+import io.github.saqqqner.diagramkiln.dto.LabeledLayoutResult;
+import io.github.saqqqner.diagramkiln.dto.PositionedEdgeLabel;
 import org.eclipse.elk.core.options.HierarchyHandling;
 import org.eclipse.elk.core.options.SizeConstraint;
 import org.eclipse.elk.core.util.BasicProgressMonitor;
@@ -46,12 +51,25 @@ public final class ElkLayout implements LayoutEngine {
 
   @Override
   public LayoutResult layout(DiagramData diagram, LayoutOptions options) {
+    return compute(diagram, options, null).geometry();
+  }
+
+  @Override
+  public LabeledLayoutResult layoutWithEdgeLabels(DiagramData diagram, LayoutOptions options,
+      EdgeLabelSize fallbackSize) {
+    if (fallbackSize == null)
+      throw new IllegalArgumentException("edge label fallback size must not be null");
+    return compute(diagram, options, fallbackSize);
+  }
+
+  private LabeledLayoutResult compute(DiagramData diagram, LayoutOptions options,
+      EdgeLabelSize fallbackSize) {
     if (options == null)
       throw new IllegalArgumentException("layout options must not be null");
     var data = DiagramValidator.snapshot(diagram);
     var index = new DiagramIndex(data);
     if (index.nodes().isEmpty())
-      return new LayoutResult(List.of(), List.of());
+      return new LabeledLayoutResult(new LayoutResult(List.of(), List.of()), List.of());
     registerAlgorithm();
     var graph = ElkGraphUtil.createGraph();
     configure(graph, options);
@@ -98,6 +116,13 @@ public final class ElkLayout implements LayoutEngine {
     for (var edge : index.edges()) {
       var elk = ElkGraphUtil.createSimpleEdge(elkNodes.get(edge.sourceId()),
           elkNodes.get(edge.targetId()));
+      if (fallbackSize != null && !edge.label().isEmpty()) {
+        var size = edge instanceof SizedDiagramEdge sized ? sized.labelSize() : fallbackSize;
+        var label = ElkGraphUtil.createLabel(edge.label(), elk);
+        label.setDimensions(size.width(), size.height());
+        label.setProperty(CoreOptions.EDGE_LABELS_PLACEMENT, EdgeLabelPlacement.CENTER);
+        label.setProperty(CoreOptions.EDGE_LABELS_INLINE, false);
+      }
       elkEdges.add(elk);
     }
     new RecursiveGraphLayoutEngine().layout(graph, new BasicProgressMonitor());
@@ -108,6 +133,7 @@ public final class ElkLayout implements LayoutEngine {
           new PositionedNode(id, origin.x(), origin.y(), node.getWidth(), node.getHeight()));
     });
     var edges = new ArrayList<RoutedEdge>();
+    var labels = new ArrayList<PositionedEdgeLabel>();
     for (int i = 0; i < elkEdges.size(); i++) {
       var edge = elkEdges.get(i);
       if (edge.getSections().size() != 1)
@@ -127,8 +153,16 @@ public final class ElkLayout implements LayoutEngine {
       points.set(last, NodeGeometry.attach(points.get(last), nodes.get(input.targetId()),
           index.node(input.targetId())));
       edges.add(new RoutedEdge(i, points));
+      if (fallbackSize != null && !input.label().isEmpty()) {
+        if (edge.getLabels().size() != 1)
+          throw new IllegalStateException("Expected one ELK label for edge " + i);
+        var label = edge.getLabels().get(0);
+        labels.add(new PositionedEdgeLabel(i, label.getX() + offset.x(), label.getY() + offset.y(),
+            label.getWidth(), label.getHeight()));
+      }
     }
-    return new LayoutResult(new ArrayList<>(nodes.values()), edges);
+    return new LabeledLayoutResult(new LayoutResult(new ArrayList<>(nodes.values()), edges),
+        labels);
   }
 
   private void configure(ElkNode node, LayoutOptions options) {

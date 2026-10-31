@@ -4,7 +4,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import io.github.saqqqner.diagramkiln.DiagramData;
 import io.github.saqqqner.diagramkiln.dto.LayoutResult;
+import io.github.saqqqner.diagramkiln.dto.LabeledLayoutResult;
+import io.github.saqqqner.diagramkiln.dto.PositionedEdgeLabel;
 import io.github.saqqqner.diagramkiln.dto.Point;
+import io.github.saqqqner.diagramkiln.internal.geometry.EdgeLabelGeometry;
+import io.github.saqqqner.diagramkiln.internal.validation.EdgeLabelGeometryValidator;
+import java.util.List;
 import io.github.saqqqner.diagramkiln.dto.PositionedNode;
 import io.github.saqqqner.diagramkiln.dto.RoutedEdge;
 import io.github.saqqqner.diagramkiln.internal.validation.DiagramIndex;
@@ -54,6 +59,18 @@ public final class DrawioXmlWriter {
 
   public String write(DiagramData data, LayoutResult layout) {
     GeometryValidator.validate(data, layout);
+    return writeValidated(data, layout, null);
+  }
+
+  public String write(DiagramData data, LabeledLayoutResult result) {
+    EdgeLabelGeometryValidator.validate(data, result);
+    var labels = new PositionedEdgeLabel[result.geometry().edges().size()];
+    result.labels().forEach(label -> labels[label.edgeIndex()] = label);
+    return writeValidated(data, result.geometry(), labels);
+  }
+
+  private String writeValidated(DiagramData data, LayoutResult layout,
+      PositionedEdgeLabel[] labels) {
     var index = new DiagramIndex(data);
     try {
       var document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
@@ -111,6 +128,8 @@ public final class DrawioXmlWriter {
         var geometry = append(cell, "mxGeometry");
         geometry.setAttribute("as", "geometry");
         geometry.setAttribute("relative", "1");
+        if (labels != null && labels[i] != null)
+          labelGeometry(geometry, labels[i], points);
         if (points.size() > 2) {
           var array = append(geometry, "Array");
           array.setAttribute("as", "points");
@@ -125,6 +144,32 @@ public final class DrawioXmlWriter {
     }
     catch (ParserConfigurationException | TransformerException exception) {
       throw new IllegalStateException("Could not generate draw.io XML", exception);
+    }
+  }
+
+  private void labelGeometry(Element geometry, PositionedEdgeLabel label, List<Point> points) {
+    try {
+      var midpoint = EdgeLabelGeometry.midpoint(points);
+      double centerX = label.x() + label.width() / 2;
+      double centerY = label.y() + label.height() / 2;
+      double offsetX = centerX - midpoint.x();
+      double offsetY = centerY - midpoint.y();
+      if (!Double.isFinite(centerX) || !Double.isFinite(centerY) || !Double.isFinite(offsetX)
+          || !Double.isFinite(offsetY))
+        throw new IllegalArgumentException("Label offset arithmetic is not finite");
+      number(geometry, "x", 0);
+      number(geometry, "y", 0);
+      number(geometry, "width", label.width());
+      number(geometry, "height", label.height());
+      var offset = append(geometry, "mxPoint");
+      offset.setAttribute("as", "offset");
+      number(offset, "x", offsetX);
+      number(offset, "y", offsetY);
+    }
+    catch (IllegalArgumentException exception) {
+      throw new IllegalArgumentException(
+          "Invalid label placement for edge " + label.edgeIndex() + ": " + exception.getMessage(),
+          exception);
     }
   }
 

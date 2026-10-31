@@ -129,7 +129,7 @@ and nonnegative.
 
 Shapes: `RECTANGLE`, `ELLIPSE`, `DIAMOND`. Arrowheads: `NONE`, `CLASSIC`, `BLOCK`, `OPEN`, `DIAMOND`.
 Colors use `#RRGGBB`; fill and stroke also accept `none`. Dimensions are in pixels and font sizes
-are in points. Stroke widths and font sizes must be finite and positive; `headerHeight=0` is valid.
+are in pixels. Stroke widths and font sizes must be finite and positive; `headerHeight=0` is valid.
 DSL calls without an explicit style use defaults().
 
 ## Layout DSL
@@ -297,7 +297,18 @@ a style record component to supply custom appearance. Groups implement DiagramGr
 diagram() and optionally groupStyle(); the default label comes from the nested sectionName().
 
 Build and export capture deep immutable snapshots. Do not mutate DTOs during capture. Later changes
-to source DTOs or builders do not affect completed results.
+to source DTOs or builders do not affect completed results. Directly constructing `DefaultDiagram`
+copies its lists; arbitrary objects in those lists are captured later by build or export.
+
+Capture preserves the public input properties, including `SizedDiagramNode.size()` and
+`LayoutDiagramNode.layout()`. It does not retain application DTO classes or arbitrary additional
+properties. Custom engines should use the supported input contracts; keep any external
+configuration they need immutable and resolve it by input ID.
+
+Input IDs identify nodes and groups within the diagram. Exported XML uses generated cell IDs
+based on traversal order, so those IDs can change when elements are inserted or reordered.
+The exporter does not merge previous XML or preserve manual edits from an earlier export.
+Connection routes are matched by traversal index, not by label or by a persistent edge ID.
 
 ## Custom layout
 
@@ -310,7 +321,92 @@ Rectangles and Points use absolute page coordinates in pixels. First/last route 
 on the visible endpoint boundaries; intermediate points are bends. Edge indices follow root edges()
 first, then nested edges recursively in group order. The exporter validates geometry and converts
 it into parent-relative draw.io coordinates. Internal edges belong to their common container and
-move with it.
+move with it. A custom engine controls the final bounds and interprets the options itself;
+it must return every node, group and route exactly once, even if it ignores a layout preference.
+
+[CustomLayoutDiagram.java](../examples/CustomLayoutDiagram.java) is a complete runnable example.
+Its engine deliberately supplies fixed geometry for the included workflow only; it is not a
+general-purpose layout algorithm. All positions are absolute: the group starts at `(100, 100)`,
+its first leaf at `(140, 160)`, and the exported leaf geometry is therefore `(40, 60)`.
+The root connection has route index `0`, although the group is declared first. The connection
+declared inside that group has index `1`. Both routes include their boundary endpoints.
+
+After building the development JAR and copying runtime dependencies as described below, run
+from the repository root on Windows:
+
+```powershell
+javac --release 17 -encoding UTF-8 -cp "target/diagram-kiln-1.2.0-SNAPSHOT.jar;target/dependency/*" -d target/examples examples/CustomLayoutDiagram.java
+java -cp "target/examples;target/diagram-kiln-1.2.0-SNAPSHOT.jar;target/dependency/*" CustomLayoutDiagram target/custom-layout.drawio
+```
+
+On Linux/macOS, replace the classpath separator `;` with `:`. For a different built version,
+replace the JAR filename. The example writes UTF-8 XML and a matching `.url` file and creates
+the output directory if needed. Open the `.drawio` file in draw.io. The nested connection
+belongs to the group; the connection to the outside node belongs to the root layer.
+
+Invalid custom geometry fails before XML is returned. For example, omitting the outside node
+from the example result causes `IllegalArgumentException: Layout node count does not match
+diagram`. Custom-engine exceptions are otherwise propagated. Engine implementations own
+their mutable state and thread-safety policy; exporter reuse does not make a custom engine
+thread-safe.
+
+## Edge-label-aware layout (1.2.0)
+
+Edge-label placement is disabled by default. Enable it with a fallback reserved size, and
+optionally give individual edges their own sizes:
+
+```java
+var diagram = Diagrams.diagram("Release")
+    .node("draft", "Draft").node("approved", "Approved")
+    .edge("draft", "approved", "Review requirements\nApprove release", EdgeStyle.defaults(),
+        new EdgeLabelSize(240, 50))
+    .build();
+var exporter = DrawioExporter.builder().edgeLabels(new EdgeLabelSize(160, 30)).build();
+var result = exporter.export(diagram);
+```
+
+Import `EdgeLabelSize` from `io.github.saqqqner.diagramkiln.dto`. Both dimensions must be finite,
+positive pixels. The bundled ELK engine reserves this space during layout and returns label
+bounds; enabled layout may change node positions, group bounds and routes. The XML keeps labels
+editable on their original edges. Existing calls retain their previous behavior and geometry.
+
+Sizes are caller estimates, not font measurements. Use enough space for the actual text and
+font; explicit newlines are supported, but width does not guarantee automatic word wrapping.
+Underestimated boxes can overflow, and layout does not guarantee elimination of every overlap.
+An empty string creates no label box. Whitespace-only labels remain labels.
+
+`SizedDiagramEdge.labelSize()` supplies per-edge metadata for application DTOs; `SizedEdge` is
+the ready-made immutable implementation. Capture reads this capability once and preserves it.
+A missing size is invalid even when placement is disabled or the label is empty. Unsized edges
+use the required exporter fallback. The five-argument DSL overload avoids ambiguity with the
+existing four-argument style overload.
+
+The last `edgeLabels(size)` or `withoutEdgeLabels()` call wins. Setting the engine, direction,
+node size or layout options does not reset this choice. Already-built exporters retain their
+settings independently of subsequent builder changes.
+
+Custom engines can override `LayoutEngine.layoutWithEdgeLabels(diagram, options, fallbackSize)`.
+The result is `LabeledLayoutResult`, containing the existing `LayoutResult` and one
+`PositionedEdgeLabel` for each nonempty label. Bounds are absolute page coordinates; indices
+follow the existing root-first edge traversal. Returned dimensions are authoritative. Labels
+owned by a group must fit its content area below the header, including when an edge connects
+a group to a descendant. Invalid coverage, bounds or overflowing derived offsets fail before
+XML is returned. Root-owned labels have no artificial page bounds.
+
+Existing custom engines and lambdas still work with placement disabled. Enabling it on an
+engine that does not override the new operation throws `UnsupportedOperationException` instead
+of silently ignoring the request.
+
+[EdgeLabelDiagram.java](../examples/EdgeLabelDiagram.java) is a complete synthetic example with
+nested, self-loop and parallel connections. After building the development JAR and copying
+runtime dependencies, run on Windows:
+
+```powershell
+javac --release 17 -encoding UTF-8 -cp "target/diagram-kiln-1.2.0-SNAPSHOT.jar;target/dependency/*" -d target/examples examples/EdgeLabelDiagram.java
+java -cp "target/examples;target/diagram-kiln-1.2.0-SNAPSHOT.jar;target/dependency/*" EdgeLabelDiagram target/edge-labels.drawio
+```
+
+Use `:` instead of `;` on Linux/macOS. The example writes matching UTF-8 XML and a `.url` file.
 
 ## Errors and limitations
 
@@ -323,8 +419,7 @@ arbitrary engine failures. XML infrastructure failures are wrapped in IllegalSta
 
 Each export contains one page. Labels are escaped plain text, without HTML interpretation.
 Leaf bounds are fixed; increase the individual size or global nodeSize for longer text or larger
-fonts. Automatic text
-measurement and independent edge-label overlap optimization are not implemented. Practical
+fonts. Automatic text measurement and global collision elimination are not implemented. Practical
 nesting depth is limited by JVM resources. The default exporter is reusable; custom layout
 engines own their thread-safety contract.
 
