@@ -35,8 +35,7 @@ class EdgeLabelExportTest {
   private final EdgeLabelSize fallback = new EdgeLabelSize(120, 30);
 
   @Test
-  void serializesEditableLabelWithFinalRouteMidpointAndTranslationInvariantOffset()
-      throws Exception {
+  void serializesEditableLabelWithEndpointMidpointAndTranslationInvariantOffset() throws Exception {
     var diagram = nestedDiagram();
     for (double shift : new double[]
     {0, 1000
@@ -50,7 +49,7 @@ class EdgeLabelExportTest {
       var edge = cell(document, "Согласование 100% +\n第二行");
       assertEquals(group.getAttribute("id"), edge.getAttribute("parent"));
       var geometry = (Element) edge.getElementsByTagName("mxGeometry").item(0);
-      assertEquals("1", geometry.getAttribute("relative"));
+      assertEquals("0", geometry.getAttribute("relative"));
       assertEquals(0, number(geometry, "x"));
       assertEquals(0, number(geometry, "y"));
       // The custom engine's final dimensions, not the 120x30 input hint, are authoritative.
@@ -59,10 +58,10 @@ class EdgeLabelExportTest {
       var offset = (Element) geometry.getElementsByTagName("mxPoint").item(0);
       assertEquals("offset", offset.getAttribute("as"));
       assertEquals(0, number(offset, "x"));
-      assertEquals(-60, number(offset, "y"));
-      // Hand-derived route midpoint is (320,280); desired label center is (320,220).
+      assertEquals(40, number(offset, "y"));
+      // Endpoint midpoint is (320,180); desired label center is (320,220).
       assertEquals(320 + shift, 320 + shift + number(offset, "x"));
-      assertEquals(220 + shift, 280 + shift + number(offset, "y"));
+      assertEquals(220 + shift, 180 + shift + number(offset, "y"));
       var bends = (Element) geometry.getElementsByTagName("Array").item(0);
       var firstBend = (Element) bends.getElementsByTagName("mxPoint").item(0);
       assertEquals(180, number(firstBend, "x"));

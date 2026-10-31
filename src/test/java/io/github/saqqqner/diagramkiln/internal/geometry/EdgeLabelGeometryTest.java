@@ -8,8 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class EdgeLabelGeometryTest {
   @Test
-  void findsHalfLengthInsteadOfMiddleVertexOrEndpointAverage() {
-    assertEquals(new Point(100, 100), EdgeLabelGeometry
+  void usesEndpointAverageRegardlessOfIntermediateBends() {
+    assertEquals(new Point(50, 150), EdgeLabelGeometry
         .midpoint(List.of(new Point(0, 0), new Point(100, 0), new Point(100, 300))));
   }
 
@@ -30,12 +30,12 @@ class EdgeLabelGeometryTest {
   }
 
   @Test
-  void rejectsFiniteInputWhoseDifferencesOrTotalLengthOverflow() {
+  void avoidsSumAndRouteLengthOverflowButRejectsDrawioDifferenceOverflow() {
     assertThrows(IllegalArgumentException.class,
         () -> EdgeLabelGeometry.midpoint(List.of(new Point(-1e308, 0), new Point(1e308, 0))));
-    assertThrows(IllegalArgumentException.class, () -> EdgeLabelGeometry
-        .midpoint(List.of(new Point(0, 0), new Point(1e308, 0), new Point(0, 0))));
-    assertThrows(IllegalArgumentException.class,
-        () -> EdgeLabelGeometry.midpoint(List.of(new Point(0, 0), new Point(1.3e308, 1.3e308))));
+    assertEquals(new Point(1e308, 0),
+        EdgeLabelGeometry.midpoint(List.of(new Point(1e308, 0), new Point(1e308, 0))));
+    assertEquals(new Point(0, 0),
+        EdgeLabelGeometry.midpoint(List.of(new Point(0, 0), new Point(1e308, 0), new Point(0, 0))));
   }
 }

@@ -248,3 +248,32 @@ title. The URL is an export example, not an endorsement by the editor vendor.
 
 The package includes the project's MIT license and the scoped third-party
 inventory and Wrapper notices described in [THIRD-PARTY.md](../THIRD-PARTY.md).
+
+## Edge-label review (1.2.0 development)
+
+The original label tests covered input snapshots, invalid/nonfinite/nonpositive dimensions,
+per-edge overrides, custom-engine failures, nested ownership, all four directions, self-loops,
+parallel edges, XML and fragment round trips. Their offset assertions assumed an unrounded
+route midpoint. Actual draw.io relative geometry rounds that distance: a 101-pixel straight
+route anchors at 51 rather than 50.5, shifting the requested box by half a pixel.
+
+Labeled exports now use native absolute edge geometry and offsets from the endpoint midpoint.
+The label remains on its editable edge cell. Disabled exports retain their existing geometry.
+Regression coverage adds odd/fractional lengths, tiny bends, repeated and fully degenerate
+points, nested translation and four zoom scales. A separate compatibility test compiles an
+implementation and lambda against the pre-1.2 layout interface, removes that interface from
+the runtime path, then links both clients against the new API. Existing engines still work
+when disabled and inherit the explicit UnsupportedOperationException when enabled.
+
+The review also executed the actual getPoint, updateEdgeLabelOffset and moveLabel functions
+from [draw.io's bundled mxGraph](https://github.com/jgraph/drawio/blob/dev/src/main/webapp/mxgraph/mxClient.js)
+(reported version 32.6.9) in Node: the original half-pixel shift reproduced, 32 absolute-offset
+cases preserved their requested centers, and moving a label updated its editable offset.
+This is an engine-level check, not a new interactive editor screenshot or a guarantee for
+every editor version. Existing CI compiles Java callers and parses XML; it does not launch
+draw.io or verify visual collision freedom. Dimensions remain caller estimates, global
+overlap elimination is not guaranteed, and custom engines must implement the labeled SPI.
+
+The generated EdgeLabelDiagram example was also opened in the draw.io web editor: the group,
+four connections, self-loop, two parallel Release labels and bilingual multiline label were
+visible. This visual check does not replace the numeric regressions above.

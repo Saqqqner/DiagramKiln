@@ -369,6 +369,9 @@ Import `EdgeLabelSize` from `io.github.saqqqner.diagramkiln.dto`. Both dimension
 positive pixels. The bundled ELK engine reserves this space during layout and returns label
 bounds; enabled layout may change node positions, group bounds and routes. The XML keeps labels
 editable on their original edges. Existing calls retain their previous behavior and geometry.
+Label boxes use draw.io's absolute edge geometry, with an editable offset from the endpoint
+midpoint. This avoids rounding of fractional route distances in relative edge-label geometry.
+After manual rerouting, the offset follows that midpoint; rerun layout to compute new placement.
 
 Sizes are caller estimates, not font measurements. Use enough space for the actual text and
 font; explicit newlines are supported, but width does not guarantee automatic word wrapping.

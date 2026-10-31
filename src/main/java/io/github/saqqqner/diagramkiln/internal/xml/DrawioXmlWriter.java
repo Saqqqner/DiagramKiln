@@ -149,6 +149,9 @@ public final class DrawioXmlWriter {
 
   private void labelGeometry(Element geometry, PositionedEdgeLabel label, List<Point> points) {
     try {
+      // Relative geometry rounds route distances in draw.io, moving fractional label boxes.
+      // Absolute edge geometry remains editable and anchors at the endpoint midpoint.
+      geometry.setAttribute("relative", "0");
       var midpoint = EdgeLabelGeometry.midpoint(points);
       double centerX = label.x() + label.width() / 2;
       double centerY = label.y() + label.height() / 2;
