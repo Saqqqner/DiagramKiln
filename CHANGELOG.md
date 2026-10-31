@@ -2,6 +2,15 @@
 
 ## Unreleased — 1.2.0-SNAPSHOT
 
+- Opt-in edge-label-aware layout with fallback or per-edge box sizes, validated label geometry,
+  and editable draw.io offsets. Existing export behavior remains the default.
+- Preserve fractional label positions using native absolute draw.io offsets; verify linkage of
+  previously compiled custom layout engines and lambdas.
+- Additive labeled layout SPI for custom engines, with explicit failure when unsupported.
+- Propagate the existing pinned Guava runtime version to packaged consumers.
+- Runnable custom-layout and edge-label examples; clarified capture, coordinate and font-unit
+  contracts in the user guide.
+
 ## 1.1.0 — 2026-10-20
 
 - Maven groupId changed to io.github.saqqqner; Java packages and automatic module name remain

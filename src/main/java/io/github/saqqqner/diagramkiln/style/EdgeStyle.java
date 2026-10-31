@@ -12,7 +12,7 @@ package io.github.saqqqner.diagramkiln.style;
  * @param fontColor
  *          text color (#RRGGBB)
  * @param fontSize
- *          text size in points
+ *          text size in pixels
  * @param bold
  *          whether text is bold
  * @param startArrow
@@ -45,7 +45,7 @@ public record EdgeStyle(String strokeColor, double strokeWidth, boolean dashed, 
    * @param fontColor
    *          text color
    * @param fontSize
-   *          text size in points
+   *          text size in pixels
    * @param bold
    *          whether text is bold
    * @param startArrow
@@ -71,7 +71,7 @@ public record EdgeStyle(String strokeColor, double strokeWidth, boolean dashed, 
    * @param fontColor
    *          text color (#RRGGBB)
    * @param fontSize
-   *          text size in points
+   *          text size in pixels
    * @param bold
    *          whether text is bold
    * @param startArrow
@@ -189,10 +189,10 @@ public record EdgeStyle(String strokeColor, double strokeWidth, boolean dashed, 
     }
 
     /**
-     * Sets text size in points.
+     * Sets text size in pixels.
      *
      * @param value
-     *          text size in points
+     *          text size in pixels
      * @return this builder
      */
     public Builder fontSize(double value) {
